@@ -1,9 +1,9 @@
-# 🧶 KOK BASIC
+# KOK BASIC
 
 > **K**ode **O**n **K**anvas – Minimalistyczne środowisko BASIC dla dzieci i pasjonatów retro.
 
-![KOK Basic Logo](<img width="282" height="331" alt="Zrzut ekranu z 2026-10-18 22-38-08" src="https://github.com/user-attachments/assets/907c3875-5018-4746-a1aa-efd2ae076c61" />
-) <!-- Tutaj możesz wrzucić plik z logo -->
+<img width="282" height="331" alt="Zrzut ekranu z 2026-10-18 22-38-08" src="https://github.com/user-attachments/assets/0fffecb9-8801-4737-a788-7d225009620e" />
+
 
 **KOK BASIC** to lekka, pełnoekranowa aplikacja napisana w Pythonie (Pygame), stworzona z myślą o bezstresowej nauce programowania dla dzieci. Projekt inspirowany jest klasycznymi systemami 8-bitowymi oraz systemem MMBasic z urządzeń typu PicoCalc.
 
