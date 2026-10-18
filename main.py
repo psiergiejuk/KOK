@@ -5,32 +5,30 @@ from core.interpreter import Interpreter
 from devices.display import DisplayDevice
 
 def main():
-    pygame.init()
+    pygame.init()  # <-- NAJPIERW INICJALIZACJA SYSTEMU PYGAME
     
-    # Inicjalizacja komponentów
+    # POTEM TWORZYMY URZĄDZENIA (dzięki temu system wideo jest już gotowy)
     display = DisplayDevice(1024, 768)
     model = ProgramModel()
     interpreter = Interpreter(model, display)
 
-    # Przykładowy testowy kod wrzucony do modelu
     model.set_line(10, "COLOR yellow")
     model.set_line(20, "CIRCLE 512, 384, 100")
 
-    clock = pygame.time.Clock()
-    running = True
-
-    # Tymczasowe uruchomienie programu na start
     display.clear("black")
     interpreter.run_program()
     display.update()
 
+    clock = pygame.time.Clock()
+    running = True
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running =jaer = False
+                running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False # Wyjście pod ESC
+                    running = False
 
         clock.tick(60)
 

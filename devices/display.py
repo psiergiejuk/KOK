@@ -1,26 +1,39 @@
-# Wewnątrz głównej pętli w main.py
+# devices/display.py
+import pygame
 
-import time
+# Retro paleta kolorów (PICO-8 style)
+PALETTE = {
+    "black": (0, 0, 0),
+    "white": (255, 255, 255),
+    "red": (255, 0, 77),
+    "blue": (41, 173, 255),
+    "yellow": (255, 236, 39),
+    "green": (0, 228, 54)
+}
 
-running = True
-exit_requested_time = 0
-EXIT_TIMEOUT = 2.0  # Masz 2 sekundy na drugie wciśnięcie ESC
+class DisplayDevice:
+    def __init__(self, width=1024, height=768):
+        self.width = width
+        self.height = height
+        
+        # Ekran tworzymy tutaj – ta metoda wykona się w main.py PO pygame.init()
+        self.screen = pygame.display.set_mode(
+            (self.width, self.height), 
+            pygame.FULLSCREEN | pygame.SCALED
+        )
+        pygame.display.set_caption("KOK BASIC")
+        self.current_color = PALETTE["white"]
 
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                current_time = time.time()
-                
-                # Sprawdzamy, czy użytkownik wcisnął ESC drugi raz w ciągu 2 sekund
-                if exit_requested_time and (current_time - exit_requested_time < EXIT_TIMEOUT):
-                    running = False
-                else:
-                    exit_requested_time = current_time
-                    print("Wciśnij ESC ponownie, aby wyjść z KOK BASIC.")
-                    # Tutaj w przyszłości możemy też wyświetlić napis na ekranie dla dziecka!
+    def clear(self, color_name="black"):
+        bg_color = PALETTE.get(color_name, (0, 0, 0))
+        self.screen.fill(bg_color)
 
-    clock.tick(60)
+    def set_color(self, color_name):
+        if color_name in PALETTE:
+            self.current_color = PALETTE[color_name]
+
+    def draw_circle(self, x, y, radius):
+        pygame.draw.circle(self.screen, self.current_color, (x, y), radius)
+
+    def update(self):
+        pygame.display.flip()
