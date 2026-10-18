@@ -1,34 +1,26 @@
-# devices/display.py
-import pygame
+# Wewnątrz głównej pętli w main.py
 
-# Stała, retro paleta kolorów (jak w PICO-8)
-PALETTE = {
-    "black": (0, 0, 0),
-    "white": (255, 255, 255),
-    "red": (255, 0, 77),
-    "blue": (41, 173, 255),
-    "yellow": (255, 236, 39),
-    "green": (0, 228, 54)
-}
+import time
 
-class DisplayDevice:
-    def __init__(self, width=800, height=600):
-        self.width = width
-        self.height = height
-        self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("KOK BASIC")
-        self.current_color = PALETTE["white"]
+running = True
+exit_requested_time = 0
+EXIT_TIMEOUT = 2.0  # Masz 2 sekundy na drugie wciśnięcie ESC
 
-    def clear(self, color_name="black"):
-        bg_color = PALETTE.get(color_name, (0, 0, 0))
-        self.screen.fill(bg_color)
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                current_time = time.time()
+                
+                # Sprawdzamy, czy użytkownik wcisnął ESC drugi raz w ciągu 2 sekund
+                if exit_requested_time and (current_time - exit_requested_time < EXIT_TIMEOUT):
+                    running = False
+                else:
+                    exit_requested_time = current_time
+                    print("Wciśnij ESC ponownie, aby wyjść z KOK BASIC.")
+                    # Tutaj w przyszłości możemy też wyświetlić napis na ekranie dla dziecka!
 
-    def set_color(self, color_name):
-        if color_name in PALETTE:
-            self.current_color = PALETTE[color_name]
-
-    def draw_circle(self, x, y, radius):
-        pygame.draw.circle(self.screen, self.current_color, (x, y), radius)
-
-    def update(self):
-        pygame.display.flip()
+    clock.tick(60)
