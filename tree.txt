@@ -1,0 +1,41 @@
+PRINT_1
+  jak masz na imię
+  ile masz lat
+  jaki ulubiony kolor
+  powtórz bezbłędnie 5 razy
+CLS
+  wyczyść ekran
+  powtórz print 5 razy
+  wyczyść ekran
+EXIT
+  zamknij program przez EXIT 
+  uruchom jeszcze raz 
+TECH
+  wyświetla swój profil ()
+  wyprintuje jaką ilość punktów masz
+  wyprintuj ile punktów nauki masz
+  wyświetl aktualne zadanie
+  Wyświetl tech tree
+MAT
+  Dodawanie
+  Odejmowanie
+  Mnożenie 
+  Dzielenie
+ZMIENNE
+  tworzenie
+  rodzaje
+  uzycie
+  błędne użycie 
+HISTORIA
+  Strzałki
+  Pełna historia
+PODPOWIEDZI
+  Wyświetlanie
+  Wybieranie
+  filtrowanie
+PRINT_2
+  łączenie zmiennych 
+  newline 
+  tabulator
+  ilość cyfr po przecinku
+  
