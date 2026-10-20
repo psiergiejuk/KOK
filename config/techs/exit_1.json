@@ -1,0 +1,9 @@
+{
+  "id": "EXIT_1",
+  "name": "EXIT - Bezpieczne zamykanie",
+  "cost": 5,
+  "requires": ["VARS_1"],
+  "unlocks_commands": ["exit"],
+  "tasks": []
+}
+

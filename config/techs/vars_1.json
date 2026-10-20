@@ -1,0 +1,219 @@
+{
+  "id": "VARS_1",
+  "name": "Zmienne BASIC - 30 wyzwań",
+  "cost": 15,
+  "requires": ["MATH_1"],
+  "unlocks_commands": ["print", "cls", "let"],
+  "tasks": [
+    {
+      "id": "var_1",
+      "title": "Zadanie 1: Twoja pierwsza zmienna A",
+      "instruction": "Przypisz wartość do zmiennej wpisując: A = 5 i wciśnij ENTER.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "A", "require_quotes": false }
+    },
+    {
+      "id": "var_2",
+      "title": "Zadanie 2: Wypisz zmienną A",
+      "instruction": "Wpisz PRINT A, aby zobaczyć wartość zmiennej.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_3",
+      "title": "Zadanie 3: Zmienna tekstowa IMIĘ",
+      "instruction": "Utwórz zmienną tekstową wpisując: IMIE$ = \"Kuba\"",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "IMIE$", "require_quotes": true }
+    },
+    {
+      "id": "var_4",
+      "title": "Zadanie 4: Wypisz imię ze zmiennej",
+      "instruction": "Wpisz PRINT IMIE$",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_5",
+      "title": "Zadanie 5: Porządki na ekranie",
+      "instruction": "Wyczyść ekran komendą CLS.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "CLS" }
+    },
+    {
+      "id": "var_6",
+      "title": "Zadanie 6: Zmienna B",
+      "instruction": "Wpisz B = 10",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "B", "require_quotes": false }
+    },
+    {
+      "id": "var_7",
+      "title": "Zadanie 7: Dodawanie zmiennych A + B",
+      "instruction": "Wpisz PRINT A + B",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_8",
+      "title": "Zadanie 8: Zmienna C",
+      "instruction": "Wpisz C = 20",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_9",
+      "title": "Zadanie 9: Działanie na trzech zmiennych",
+      "instruction": "Wpisz PRINT A + B + C",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_10",
+      "title": "Zadanie 10: Ekran",
+      "instruction": "Wpisz CLS",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "CLS" }
+    },
+    {
+      "id": "var_11",
+      "title": "Zadanie 11: Zmienna WIEK",
+      "instruction": "Wpisz WIEK = 10",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "WIEK", "require_quotes": false }
+    },
+    {
+      "id": "var_12",
+      "title": "Zadanie 12: Wiek za rok",
+      "instruction": "Wpisz PRINT WIEK + 1",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_13",
+      "title": "Zadanie 13: Zmienna MIASTO",
+      "instruction": "Wpisz MIASTO$ = \"Warszawa\"",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "MIASTO$", "require_quotes": true }
+    },
+    {
+      "id": "var_14",
+      "title": "Zadanie 14: Drukuj miasto",
+      "instruction": "Wpisz PRINT MIASTO$",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_15",
+      "title": "Zadanie 15: Czysto",
+      "instruction": "Wpisz CLS",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "CLS" }
+    },
+    {
+      "id": "var_16",
+      "title": "Zadanie 16: Wynik mnożenia w zmiennej",
+      "instruction": "Wpisz X = 4 * 5",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "X", "require_quotes": false }
+    },
+    {
+      "id": "var_17",
+      "title": "Zadanie 17: Pokaż X",
+      "instruction": "Wpisz PRINT X",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_18",
+      "title": "Zadanie 18: Zmienna Y",
+      "instruction": "Wpisz Y = 50 / 2",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "Y", "require_quotes": false }
+    },
+    {
+      "id": "var_19",
+      "title": "Zadanie 19: Pokaż Y",
+      "instruction": "Wpisz PRINT Y",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_20",
+      "title": "Zadanie 20: Czyszczenie",
+      "instruction": "Wpisz CLS",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "CLS" }
+    },
+    {
+      "id": "var_21",
+      "title": "Zadanie 21: Słowo kluczowe LET",
+      "instruction": "Wpisz LET P = 100",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "LET", "require_quotes": false }
+    },
+    {
+      "id": "var_22",
+      "title": "Zadanie 22: Drukuj P",
+      "instruction": "Wpisz PRINT P",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_23",
+      "title": "Zadanie 23: Zmienna tekstowa z LET",
+      "instruction": "Wpisz LET ZWIERZE$ = \"Kot\"",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "LET", "require_quotes": true }
+    },
+    {
+      "id": "var_24",
+      "title": "Zadanie 24: Drukuj zwierze",
+      "instruction": "Wpisz PRINT ZWIERZE$",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_25",
+      "title": "Zadanie 25: Ekran",
+      "instruction": "Wpisz CLS",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "CLS" }
+    },
+    {
+      "id": "var_26",
+      "title": "Zadanie 26: Modyfikacja zmiennej",
+      "instruction": "Wpisz A = A + 10",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "A", "require_quotes": false }
+    },
+    {
+      "id": "var_27",
+      "title": "Zadanie 27: Sprawdź nową wartość A",
+      "instruction": "Wpisz PRINT A",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_28",
+      "title": "Zadanie 28: Kolejna zmienna",
+      "instruction": "Wpisz KOSZ = 15",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "KOSZ", "require_quotes": false }
+    },
+    {
+      "id": "var_29",
+      "title": "Zadanie 29: Wydruk końcowy zmiennej",
+      "instruction": "Wpisz PRINT KOSZ",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+    },
+    {
+      "id": "var_30",
+      "title": "Zadanie 30: Wielki Finał Zmiennych",
+      "instruction": "Wyczyść ekran komendą CLS, aby opanować zmienne do perfekcji!",
+      "reward_sp": 3,
+      "validation": { "type": "command_prefix", "target": "CLS" }
+    }
+  ]
+}
