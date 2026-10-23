@@ -17,7 +17,6 @@ def play_retro_victory_sound():
             buf = array.array('h', [int(32767 * 0.3 * math.sin(2 * math.pi * freq * i / sample_rate)) for i in range(num_samples)])
             return pygame.mixer.Sound(buffer=buf)
 
-        # Szybkie radosne arpeggio
         for f in [523.25, 659.25, 783.99, 1046.50]:
             s = make_tone(f, 0.08)
             s.play()
@@ -57,12 +56,12 @@ class RetroConsoleManager:
     def __init__(self, font):
         self.font = font
         try:
-            self.hud_font = pygame.font.SysFont("Courier New", 18)
+            self.hud_font = pygame.font.SysFont("Courier New", 16)
         except Exception:
             self.hud_font = font
 
         try:
-            self.bubble_font = pygame.font.SysFont("Courier New", 16)
+            self.bubble_font = pygame.font.SysFont("Courier New", 14)
         except Exception:
             self.bubble_font = font
 
@@ -106,8 +105,6 @@ class RetroConsoleManager:
                     with open(file_path, "r", encoding="utf-8") as tf:
                         tech_data = json.load(tf)
                         tech_tasks = tech_data.pop("tasks", [])
-
-                        # Zapisujemy identyfikatory zadań w technologii
                         tech_data["task_ids"] = [t["id"] for t in tech_tasks]
 
                         for t in tech_tasks:
@@ -238,7 +235,6 @@ class RetroConsoleManager:
                 self.console_lines.append("> ****")
 
                 if self.user_data:
-                    # Sprawdzamy czy gracz powraca po wykonaniu zadania EXIT
                     if self.user_data.get("exit_task_pending"):
                         self.user_data["exit_task_pending"] = False
                         if "exit_task" not in self.user_data.get("completed_tasks", []):
@@ -257,7 +253,6 @@ class RetroConsoleManager:
                     self.console_lines.append(f"Odblokowane technologie: {', '.join(unlocked) if unlocked else 'Brak'}")
                     _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
                     self.console_lines.append(f"Punkty SP: {tech_sp_earned} / {tech_total_sp}")
-                    print_next_available_task(self.tasks, self.user_data, self.console_lines)
                     self.current_state = self.STATE_CONSOLE
                     self.check_tech_completion()
                 else:
@@ -306,7 +301,6 @@ class RetroConsoleManager:
                 self.console_lines.append("Konto utworzone pomyślnie!")
                 _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
                 self.console_lines.append(f"Punkty SP: {tech_sp_earned} / {tech_total_sp}")
-                print_next_available_task(self.tasks, self.user_data, self.console_lines)
                 self.current_state = self.STATE_CONSOLE
                 self.check_tech_completion()
 
@@ -329,7 +323,6 @@ class RetroConsoleManager:
                             self.console_lines.append(f"> {line}")
                             self.console_lines.append(f"⭐ Odblokowano technologię: {chosen_tech['name']}! (-{cost} SP)")
                             self.console_lines.append(f"Punkty SP: {tech_sp_earned} / {tech_total_sp}")
-                            print_next_available_task(self.tasks, self.user_data, self.console_lines)
                             self.current_state = self.STATE_CONSOLE
                         else:
                             self.console_lines.append(f"❌ Za mało punktów SP! Potrzebujesz {cost} SP, masz {current_sp} SP.")
@@ -353,7 +346,6 @@ class RetroConsoleManager:
 
             # --- GŁÓWNA KONSOLA BASIC ---
             elif self.current_state == self.STATE_CONSOLE:
-                # Szybkie pomijanie zadań do testów pod cyfrą '1' lub komendą '_SKIP'
                 if line == "1" or line.upper() == "_SKIP":
                     current_task = self.get_current_active_task()
                     if current_task:
@@ -373,7 +365,6 @@ class RetroConsoleManager:
                         self.show_bubble_notification("⏩ DEBUG", "Brak zadań do pominięcia.")
                     return True
 
-                # Wciśnięcie samego ENTER daje pustą linię
                 if not line:
                     self.console_lines.append("")
                     return True
@@ -434,148 +425,224 @@ class RetroConsoleManager:
         return True
 
     def draw(self, screen, width, height):
-        # --- DYSKRETNY PASEK STATUSU (HUD) ---
-        hud_height = 34
-        pygame.draw.rect(screen, (20, 20, 42), (0, 0, width, hud_height))
-        pygame.draw.line(screen, (50, 50, 85), (0, hud_height), (width, hud_height), 1)
+        # 1. Tło obudowy monitora (retro szaro-beżowy plastik z lat 80.)
+        screen.fill((190, 185, 170))
+
+        # 2. Definicja ekranu kineskopu (CRT Viewport z zaokrąglonymi rogami)
+        margin_x = 70
+        margin_top = 50
+        panel_height = 70  # Miejsce na dolny panel z diodami i logo
+        screen_w = width - (margin_x * 2)
+        screen_h = height - margin_top - panel_height - 30
+
+        crt_rect = pygame.Rect(margin_x, margin_top, screen_w, screen_h)
+        
+        # Tworzymy powierzchnię dla zawartości ekranu CRT
+        crt_surf = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
+        crt_surf.fill((10, 20, 10))  # Ciemnozielone/czarne tło fosforowe
+
+        # --- DYSKRETNY PASEK STATUSU (HUD) W WEWNĄTRZ KINESKOPU ---
+        hud_height = 30
+        pygame.draw.rect(crt_surf, (15, 30, 15), (0, 0, screen_w, hud_height))
+        pygame.draw.line(crt_surf, (40, 80, 40), (0, hud_height), (screen_w, hud_height), 1)
 
         if self.user_data and self.current_state == self.STATE_CONSOLE:
             active_task = self.get_current_active_task()
-            if active_task:
-                mission_text = f"🎯 MISJA: {active_task['title']}"
-            else:
-                mission_text = "🎉 WSZYSTKIE DOSTĘPNE ZADANIA ZALICZONE!"
-
+            mission_text = f"🎯 MISJA: {active_task['title']}" if active_task else "🎉 ZADANIA ZALICZONE!"
             _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
-            sp_text = f"⭐ SP: {tech_sp_earned}/{tech_total_sp}  |  GRACZ: {self.user_data.get('first_name', '')}"
+            sp_text = f"⭐ SP: {tech_sp_earned}/{tech_total_sp} | {self.user_data.get('first_name', '')}"
 
-            mission_surf = self.hud_font.render(mission_text, True, (255, 215, 0))
-            sp_surf = self.hud_font.render(sp_text, True, (130, 200, 255))
+            mission_surf = self.hud_font.render(mission_text, True, (0, 255, 120))
+            sp_surf = self.hud_font.render(sp_text, True, (0, 220, 255))
 
-            screen.blit(mission_surf, (25, 7))
-            screen.blit(sp_surf, (max(width - sp_surf.get_width() - 25, 300), 7))
+            crt_surf.blit(mission_surf, (15, 6))
+            crt_surf.blit(sp_surf, (max(screen_w - sp_surf.get_width() - 15, 250), 6))
         else:
-            logo_surf = self.hud_font.render("KOK BASIC - Retro Emulator Edukacyjny", True, (140, 140, 180))
-            screen.blit(logo_surf, (25, 7))
+            logo_surf = self.hud_font.render("KOK BASIC - Retro Emulator Edukacyjny", True, (0, 200, 100))
+            crt_surf.blit(logo_surf, (15, 6))
 
-        line_height = 30
-        max_lines = (height - hud_height - 110) // line_height
+        # --- LINIE TEKSTU KONSOLI ---
+        line_height = 24
+        max_lines = (screen_h - hud_height - 60) // line_height
         visible_lines = self.console_lines[-max_lines:]
         num_lines = len(visible_lines)
-        bottom_limit = height - 90
+        bottom_limit = screen_h - 45
         start_y = bottom_limit - (num_lines * line_height)
-        y_offset = max(hud_height + 15, start_y)
+        y_offset = max(hud_height + 10, start_y)
         
         for line in visible_lines:
             if "HURA" in line or "⭐" in line:
-                color = (255, 105, 180)
-            elif line.startswith("⚠️") or line.startswith("🗑️") or "SYNTAX ERROR" in line or line.startswith("❌"):
-                color = (255, 100, 100)
+                color = (255, 100, 200)
+            elif line.startswith("⚠️") or "SYNTAX ERROR" in line or line.startswith("❌"):
+                color = (255, 80, 80)
             elif "✅" in line or "Zalogowano" in line or "BRAWO" in line:
-                color = (100, 255, 100)
+                color = (80, 255, 80)
             else:
-                color = (200, 200, 220)
+                color = (150, 255, 150)  # Klasyczny zielony fosfor CRT
                 
             text_surface = self.font.render(line, True, color)
-            screen.blit(text_surface, (50, y_offset))
+            crt_surf.blit(text_surface, (20, y_offset))
             y_offset += line_height
 
-        # --- DYMEK MISJI I POWIADOMIEŃ (PRAWY GÓRNY RÓG) ---
+        # --- DYMEK MISJI (F1) ---
         if self.user_data and self.current_state == self.STATE_CONSOLE:
             if not self.bubble_visible:
                 badge_text = "[F1] Pokaż misję 💬"
-                badge_surf = self.bubble_font.render(badge_text, True, (160, 170, 210))
-                bx = width - badge_surf.get_width() - 30
-                by = hud_height + 14
-                bg_rect = (bx - 10, by - 4, badge_surf.get_width() + 20, badge_surf.get_height() + 8)
-                pygame.draw.rect(screen, (22, 25, 48), bg_rect, border_radius=6)
-                pygame.draw.rect(screen, (60, 70, 110), bg_rect, width=1, border_radius=6)
-                screen.blit(badge_surf, (bx, by))
+                badge_surf = self.bubble_font.render(badge_text, True, (150, 255, 150))
+                bx = screen_w - badge_surf.get_width() - 20
+                by = hud_height + 10
+                bg_rect = (bx - 8, by - 3, badge_surf.get_width() + 16, badge_surf.get_height() + 6)
+                pygame.draw.rect(crt_surf, (10, 40, 20), bg_rect, border_radius=4)
+                pygame.draw.rect(crt_surf, (50, 150, 80), bg_rect, width=1, border_radius=4)
+                crt_surf.blit(badge_surf, (bx, by))
             else:
-                bubble_width = 400
-                bubble_x = width - bubble_width - 30
-                bubble_y = hud_height + 14
+                bubble_width = 320
+                bubble_x = screen_w - bubble_width - 20
+                bubble_y = hud_height + 10
 
                 if self.bubble_notification and self.bubble_notification.get("timer", 0) > 0:
                     self.bubble_notification["timer"] -= 1
                     header_text = self.bubble_notification["title"]
-                    header_color = (110, 255, 130)
-                    bg_color = (16, 38, 24, 235)
-                    border_color = (70, 220, 100)
+                    header_color = (100, 255, 150)
                     body_raw = self.bubble_notification["message"]
                 else:
                     active_task = self.get_current_active_task()
                     if active_task:
                         header_text = f"💬 {active_task['title']}"
-                        header_color = (255, 215, 60)
-                        bg_color = (18, 22, 46, 235)
-                        border_color = (190, 160, 70)
+                        header_color = (255, 220, 50)
                         body_raw = active_task.get("instruction", "")
                     else:
                         header_text = "🎉 POZIOM UKOŃCZONY!"
-                        header_color = (255, 120, 200)
-                        bg_color = (25, 20, 48, 235)
-                        border_color = (180, 80, 150)
-                        body_raw = "Wszystkie dostępne zadania w tym poziomie zostały zaliczone."
+                        header_color = (255, 100, 200)
+                        body_raw = "Wszystkie zadania ukończone."
 
                 body_lines = []
                 for paragraph in body_raw.split("\n"):
-                    body_lines.extend(wrap_text(paragraph, self.bubble_font, bubble_width - 32))
+                    body_lines.extend(wrap_text(paragraph, self.bubble_font, bubble_width - 24))
 
-                line_h = 22
+                line_h = 18
                 title_surf = self.bubble_font.render(header_text, True, header_color)
-                if title_surf.get_width() > bubble_width - 32:
-                    short_header = header_text[:32] + "..."
-                    title_surf = self.bubble_font.render(short_header, True, header_color)
-
-                content_h = 14 + title_surf.get_height() + 8 + (len(body_lines) * line_h) + 26
+                content_h = 12 + title_surf.get_height() + 6 + (len(body_lines) * line_h) + 20
+                
                 bubble_surf = pygame.Surface((bubble_width, content_h), pygame.SRCALPHA)
-                pygame.draw.rect(bubble_surf, bg_color, (0, 0, bubble_width, content_h), border_radius=8)
-                pygame.draw.rect(bubble_surf, border_color, (0, 0, bubble_width, content_h), width=2, border_radius=8)
+                pygame.draw.rect(bubble_surf, (10, 25, 15, 240), (0, 0, bubble_width, content_h), border_radius=6)
+                pygame.draw.rect(bubble_surf, (60, 180, 90), (0, 0, bubble_width, content_h), width=1, border_radius=6)
 
-                bubble_surf.blit(title_surf, (16, 10))
-                div_y = 10 + title_surf.get_height() + 5
-                pygame.draw.line(bubble_surf, (border_color[0]//2, border_color[1]//2, border_color[2]//2), (16, div_y), (bubble_width - 16, div_y), 1)
+                bubble_surf.blit(title_surf, (12, 8))
+                div_y = 8 + title_surf.get_height() + 4
+                pygame.draw.line(bubble_surf, (40, 100, 60), (12, div_y), (bubble_width - 12, div_y), 1)
 
-                curr_y = div_y + 8
+                curr_y = div_y + 6
                 for bl in body_lines:
-                    b_surf = self.bubble_font.render(bl, True, (220, 225, 245))
-                    bubble_surf.blit(b_surf, (16, curr_y))
+                    b_surf = self.bubble_font.render(bl, True, (200, 240, 200))
+                    bubble_surf.blit(b_surf, (12, curr_y))
                     curr_y += line_h
 
-                hint_surf = self.bubble_font.render("[F1] Schowaj", True, (110, 120, 160))
-                bubble_surf.blit(hint_surf, (bubble_width - hint_surf.get_width() - 14, content_h - 20))
+                hint_surf = self.bubble_font.render("[F1] Schowaj", True, (100, 140, 110))
+                bubble_surf.blit(hint_surf, (bubble_width - hint_surf.get_width() - 12, content_h - 18))
 
-                screen.blit(bubble_surf, (bubble_x, bubble_y))
+                crt_surf.blit(bubble_surf, (bubble_x, bubble_y))
 
+        # --- LINIA INPUTU I KURSOR ---
         prompt_symbol = "KOK-BASIC> " if self.current_state == self.STATE_CONSOLE else ">> "
         if self.current_state == self.STATE_CONFIRM_RESET:
             prompt_symbol = "RESET (T/N)> "
         elif self.current_state == self.STATE_SELECT_TECH:
             prompt_symbol = "WYBIERZ TECH> "
             
-        if self.current_state in [self.STATE_PASSWORD, self.STATE_REG_PASS]:
-            display_text = "*" * len(self.input_text)
-        else:
-            display_text = self.input_text
+        display_text = "*" * len(self.input_text) if self.current_state in [self.STATE_PASSWORD, self.STATE_REG_PASS] else self.input_text
 
         text_left = display_text[:self.cursor_pos]
         text_right = display_text[self.cursor_pos:]
 
-        x_cursor_pos = 50
-        prompt_surf = self.font.render(prompt_symbol, True, (255, 255, 0))
-        screen.blit(prompt_surf, (x_cursor_pos, height - 60))
+        x_cursor_pos = 20
+        prompt_surf = self.font.render(prompt_symbol, True, (100, 255, 100))
+        crt_surf.blit(prompt_surf, (x_cursor_pos, screen_h - 35))
         x_cursor_pos += prompt_surf.get_width()
 
         if text_left:
-            left_surf = self.font.render(text_left, True, (255, 255, 0))
-            screen.blit(left_surf, (x_cursor_pos, height - 60))
+            left_surf = self.font.render(text_left, True, (150, 255, 150))
+            crt_surf.blit(left_surf, (x_cursor_pos, screen_h - 35))
             x_cursor_pos += left_surf.get_width()
 
-        cursor_surf = self.font.render("_", True, (255, 255, 0))
-        screen.blit(cursor_surf, (x_cursor_pos, height - 60))
+        cursor_surf = self.font.render("_", True, (150, 255, 150))
+        crt_surf.blit(cursor_surf, (x_cursor_pos, screen_h - 35))
         x_cursor_pos += cursor_surf.get_width()
 
         if text_right:
-            right_surf = self.font.render(text_right, True, (255, 255, 0))
-            screen.blit(right_surf, (x_cursor_pos, height - 60))
+            right_surf = self.font.render(text_right, True, (150, 255, 150))
+            crt_surf.blit(right_surf, (x_cursor_pos, screen_h - 35))
+
+        # --- SCANLINES (PASKI SKANOWANIA) ---
+        scanline_surf = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
+        for y in range(0, screen_h, 3):
+            pygame.draw.line(scanline_surf, (0, 0, 0, 60), (0, y), (screen_w, y), 1)
+        crt_surf.blit(scanline_surf, (0, 0))
+
+        # ========================================================
+        # --- FIZYCZNE ZAOKRĄGLENIE RANTÓW KINESKOPU (MASKA) ---
+        # ========================================================
+        corner_radius = 18
+        mask_surf = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
+        mask_surf.fill((0, 0, 0, 0))
+        pygame.draw.rect(mask_surf, (255, 255, 255, 255), (0, 0, screen_w, screen_h), border_radius=corner_radius)
+        crt_surf.blit(mask_surf, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
+
+        # Rysujemy zaokrąglony ekran na głównym oknie obudowy
+        screen.blit(crt_surf, (margin_x, margin_top))
+
+        # Gruba czarna ramka wnęki kineskopu z zaokrąglonymi rogami
+        pygame.draw.rect(screen, (30, 30, 30), crt_rect, width=6, border_radius=corner_radius)
+        pygame.draw.rect(screen, (10, 10, 10), crt_rect, width=2, border_radius=corner_radius)
+
+        # ==========================================
+        # --- DOLNY PANEL OBUDOWY Z DIODAMI I LOGO ---
+        # ==========================================
+        panel_y = margin_top + screen_h + 10
+        
+        # Wgłębienie panelu sterowania
+        pygame.draw.rect(screen, (160, 155, 140), (margin_x, panel_y, screen_w, panel_height - 10), border_radius=6)
+        pygame.draw.rect(screen, (120, 115, 105), (margin_x, panel_y, screen_w, panel_height - 10), width=2, border_radius=6)
+
+        # Napis na obudowie
+        model_font = pygame.font.SysFont("Courier New", 14, bold=True)
+        brand_surf = model_font.render("KOK-88 EDUCATIONAL MICROCOMPUTER", True, (70, 65, 60))
+        screen.blit(brand_surf, (margin_x + 20, panel_y + 12))
+
+        # --- SEKCJA DIOD LED (STATUSOWE + GPIO DLA I/O) ---
+        led_start_x = margin_x + 360
+        led_y = panel_y + 15
+
+        main_leds = [
+            ("PWR", (0, 230, 0), True),
+            ("DISK", (230, 40, 40), False),
+            ("SYNC", (230, 200, 0), True)
+        ]
+
+        curr_lx = led_start_x
+        for label, color, is_on in main_leds:
+            lbl_surf = model_font.render(label, True, (80, 75, 70))
+            screen.blit(lbl_surf, (curr_lx, led_y + 16))
+            
+            pygame.draw.circle(screen, (90, 85, 80), (curr_lx + 12, led_y + 8), 7)
+            led_color = color if is_on else (40, 40, 40)
+            pygame.draw.circle(screen, led_color, (curr_lx + 12, led_y + 8), 5)
+            if is_on:
+                pygame.draw.circle(screen, (255, 255, 255), (curr_lx + 10, led_y + 6), 2)
+            curr_lx += 55
+
+        gpio_label = model_font.render("GPIO I/O:", True, (70, 65, 60))
+        screen.blit(gpio_label, (curr_lx + 10, led_y + 16))
+        curr_lx += 85
+
+        for i in range(8):
+            gpio_on = (i == 0 or i == 3) 
+            g_color = (0, 200, 255) if gpio_on else (40, 40, 40)
+            
+            pygame.draw.circle(screen, (90, 85, 80), (curr_lx + 8, led_y + 8), 5)
+            pygame.draw.circle(screen, g_color, (curr_lx + 8, led_y + 8), 3)
+            
+            num_surf = pygame.font.SysFont("Arial", 9).render(str(i), True, (90, 85, 80))
+            screen.blit(num_surf, (curr_lx + 5, led_y + 16))
+            
+            curr_lx += 22
