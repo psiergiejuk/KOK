@@ -25,24 +25,50 @@ def play_retro_victory_sound():
     except Exception:
         pass
 
-def print_next_available_task(tasks, user_data, console_lines):
-    """Wyświetla kolejne dostępne zadanie tylko z odblokowanych technologii."""
-    completed = set(user_data.get("completed_tasks", []))
-    unlocked_techs = set(user_data.get("unlocked_techs", []))
+def wrap_text(text: str, font, max_width: int) -> list[str]:
+    """Dzieli długi tekst na linijki tak, aby zmieścił się w zadanej szerokości w pikselach."""
+    words = text.split()
+    lines = []
+    current_line = []
+    for word in words:
+        test_line = " ".join(current_line + [word])
+        try:
+            w = font.size(test_line)[0]
+        except Exception:
+            w = len(test_line) * 10
+        if w <= max_width:
+            current_line.append(word)
+        else:
+            if current_line:
+                lines.append(" ".join(current_line))
+                current_line = [word]
+            else:
+                lines.append(word)
+                current_line = []
+    if current_line:
+        lines.append(" ".join(current_line))
+    return lines
 
-    for task in tasks:
-        tech_id = task.get("tech_id")
-        if tech_id in unlocked_techs and task["id"] not in completed:
-            console_lines.append("")
-            console_lines.append(f"ZADANIE: {task['title']}")
-            if "instruction" in task:
-                console_lines.append(f"CO ZROBIĆ: {task['instruction']}")
-            console_lines.append("")
-            return
+def print_next_available_task(tasks, user_data, console_lines):
+    """Zachowane dla kompatybilności wstecznej (zadania prezentowane są w dymku)."""
+    pass
 
 class RetroConsoleManager:
     def __init__(self, font):
         self.font = font
+        try:
+            self.hud_font = pygame.font.SysFont("Courier New", 18)
+        except Exception:
+            self.hud_font = font
+
+        try:
+            self.bubble_font = pygame.font.SysFont("Courier New", 16)
+        except Exception:
+            self.bubble_font = font
+
+        self.bubble_visible = True
+        self.bubble_notification = None
+
         self.manager = UserManager()
         self.command_registry = CommandRegistry()
 
@@ -91,6 +117,43 @@ class RetroConsoleManager:
         except Exception as e:
             print(f"Błąd ładowania konfiguracji technologii: {e}")
 
+    def get_current_active_task(self):
+        """Zwraca pierwsze nieukończone zadanie z odblokowanych technologii."""
+        if not self.user_data:
+            return None
+        unlocked = set(self.user_data.get("unlocked_techs", []))
+        completed = set(self.user_data.get("completed_tasks", []))
+        for task in self.tasks:
+            tech_id = task.get("tech_id")
+            if tech_id in unlocked and task["id"] not in completed:
+                return task
+        return None
+
+    def get_active_tech_info(self):
+        """Zwraca (active_tech_id, tech_sp_earned, tech_total_sp) dla aktualnie aktywnej technologii."""
+        if not self.user_data:
+            return "PRINT_1", 0, 5
+
+        current_task = self.get_current_active_task()
+        if current_task:
+            active_tech_id = current_task.get("tech_id")
+        else:
+            unlocked = self.user_data.get("unlocked_techs", [])
+            active_tech_id = unlocked[-1] if unlocked else "PRINT_1"
+
+        tech_tasks = [t for t in self.tasks if t.get("tech_id") == active_tech_id]
+        tech_total_sp = sum(t.get("reward_sp", 1) for t in tech_tasks) if tech_tasks else 5
+        completed = set(self.user_data.get("completed_tasks", []))
+        tech_sp_earned = sum(t.get("reward_sp", 1) for t in tech_tasks if t["id"] in completed)
+        return active_tech_id, tech_sp_earned, tech_total_sp
+
+    def show_bubble_notification(self, title: str, message: str, duration_frames: int = 150):
+        self.bubble_notification = {
+            "title": title,
+            "message": message,
+            "timer": duration_frames
+        }
+
     def check_tech_completion(self):
         """Sprawdza, czy gracz ukończył wszystkie zadania dla aktywnej technologii i może kupić kolejną."""
         completed = set(self.user_data.get("completed_tasks", []))
@@ -127,6 +190,10 @@ class RetroConsoleManager:
             self.current_state = self.STATE_SELECT_TECH
 
     def handle_keydown(self, event) -> bool:
+        if event.key in [pygame.K_F1,]:
+            self.bubble_visible = not self.bubble_visible
+            return True
+
         if event.key == pygame.K_ESCAPE:
             if self.user_data:
                 self.manager.save_user_state(self.user_data)
@@ -171,11 +238,25 @@ class RetroConsoleManager:
                 self.console_lines.append("> ****")
 
                 if self.user_data:
+                    # Sprawdzamy czy gracz powraca po wykonaniu zadania EXIT
+                    if self.user_data.get("exit_task_pending"):
+                        self.user_data["exit_task_pending"] = False
+                        if "exit_task" not in self.user_data.get("completed_tasks", []):
+                            reward = 5
+                            self.user_data.setdefault("completed_tasks", []).append("exit_task")
+                            self.user_data["science_points"] = self.user_data.get("science_points", 0) + reward
+                            self.manager.save_user_state(self.user_data)
+                            play_retro_victory_sound()
+                            self.show_bubble_notification(
+                                "🎉 BRAWO! (+5 SP)",
+                                "Wróciłeś do KOK BASIC!\nZadanie EXIT zaliczone!"
+                            )
+
                     self.console_lines.append(f"Zalogowano pomyślnie! Witaj, {self.user_data['first_name']}.")
                     unlocked = self.user_data.get('unlocked_techs', [])
                     self.console_lines.append(f"Odblokowane technologie: {', '.join(unlocked) if unlocked else 'Brak'}")
-                    max_sp = sum(t.get("reward_sp", 1) for t in self.tasks)
-                    self.console_lines.append(f"Punkty SP: {self.user_data['science_points']} / {max_sp}")
+                    _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
+                    self.console_lines.append(f"Punkty SP: {tech_sp_earned} / {tech_total_sp}")
                     print_next_available_task(self.tasks, self.user_data, self.console_lines)
                     self.current_state = self.STATE_CONSOLE
                     self.check_tech_completion()
@@ -223,6 +304,8 @@ class RetroConsoleManager:
                     password=line
                 )
                 self.console_lines.append("Konto utworzone pomyślnie!")
+                _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
+                self.console_lines.append(f"Punkty SP: {tech_sp_earned} / {tech_total_sp}")
                 print_next_available_task(self.tasks, self.user_data, self.console_lines)
                 self.current_state = self.STATE_CONSOLE
                 self.check_tech_completion()
@@ -242,10 +325,10 @@ class RetroConsoleManager:
                             self.user_data["unlocked_techs"].append(chosen_tech["id"])
                             self.manager.save_user_state(self.user_data)
 
-                            max_sp = sum(t.get("reward_sp", 1) for t in self.tasks)
+                            _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
                             self.console_lines.append(f"> {line}")
                             self.console_lines.append(f"⭐ Odblokowano technologię: {chosen_tech['name']}! (-{cost} SP)")
-                            self.console_lines.append(f"Punkty SP: {self.user_data['science_points']} / {max_sp}")
+                            self.console_lines.append(f"Punkty SP: {tech_sp_earned} / {tech_total_sp}")
                             print_next_available_task(self.tasks, self.user_data, self.console_lines)
                             self.current_state = self.STATE_CONSOLE
                         else:
@@ -272,31 +355,22 @@ class RetroConsoleManager:
             elif self.current_state == self.STATE_CONSOLE:
                 # Szybkie pomijanie zadań do testów pod cyfrą '1' lub komendą '_SKIP'
                 if line == "1" or line.upper() == "_SKIP":
-                    unlocked_techs = set(self.user_data.get("unlocked_techs", []))
-                    current_task = None
-
-                    # Szukamy pierwszego aktywnego nieukończonego zadania
-                    for task in self.tasks:
-                        tech_id = task.get("tech_id")
-                        if tech_id in unlocked_techs and task["id"] not in self.user_data["completed_tasks"]:
-                            current_task = task
-                            break
-
+                    current_task = self.get_current_active_task()
                     if current_task:
                         reward = current_task.get("reward_sp", 1)
-                        self.user_data["science_points"] += reward
-                        self.user_data["completed_tasks"].append(current_task["id"])
+                        self.user_data["science_points"] = self.user_data.get("science_points", 0) + reward
+                        self.user_data.setdefault("completed_tasks", []).append(current_task["id"])
 
-                        max_sp = sum(t.get("reward_sp", 1) for t in self.tasks)
-                        self.console_lines.append("⏩ [DEBUG] POMINIĘTO ZADANIE!")
-                        self.console_lines.append(f"✅ ZADANIE ZALICZONE! (+{reward} SP)")
-                        self.console_lines.append(f"Punkty SP: {self.user_data['science_points']} / {max_sp}")
+                        _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
                         self.manager.save_user_state(self.user_data)
-
-                        print_next_available_task(self.tasks, self.user_data, self.console_lines)
+                        play_retro_victory_sound()
+                        self.show_bubble_notification(
+                            f"⏩ POMINIĘTO (+{reward} SP)",
+                            f"Zadanie zaliczone!\nSP: {tech_sp_earned} / {tech_total_sp}"
+                        )
                         self.check_tech_completion()
                     else:
-                        self.console_lines.append("⏩ [DEBUG] Brak aktywnych zadań do pominięcia.")
+                        self.show_bubble_notification("⏩ DEBUG", "Brak zadań do pominięcia.")
                     return True
 
                 # Wciśnięcie samego ENTER daje pustą linię
@@ -307,6 +381,9 @@ class RetroConsoleManager:
                 self.console_lines.append(f"KOK-BASIC> {line}")
 
                 if line.upper() == "EXIT":
+                    current_task = self.get_current_active_task()
+                    if current_task and current_task["id"] == "exit_task":
+                        self.user_data["exit_task_pending"] = True
                     self.manager.save_user_state(self.user_data)
                     return False
 
@@ -315,7 +392,8 @@ class RetroConsoleManager:
                     self.current_state = self.STATE_CONFIRM_RESET
                     return True
 
-                found, success = self.command_registry.execute_command(line, self.console_lines)
+                variables = self.user_data.setdefault("variables", {}) if self.user_data else None
+                found, success = self.command_registry.execute_command(line, self.console_lines, variables)
 
                 if not found:
                     self.console_lines.append(f"SYNTAX ERROR: Nieznana komenda '{line.split()[0]}'")
@@ -323,54 +401,73 @@ class RetroConsoleManager:
 
                 if success:
                     cmd_name = line.split()[0].upper()
+                    if "=" in cmd_name and not cmd_name.startswith("LET"):
+                        cmd_name = cmd_name.split("=")[0].strip()
                     if "action_counts" not in self.user_data:
                         self.user_data["action_counts"] = {}
                     self.user_data["action_counts"][cmd_name] = self.user_data["action_counts"].get(cmd_name, 0) + 1
 
                     task_completed_now = False
-                    unlocked_techs = set(self.user_data.get("unlocked_techs", []))
+                    current_task = self.get_current_active_task()
 
-                    for task in self.tasks:
-                        task_id = task["id"]
-                        tech_id = task.get("tech_id")
+                    if current_task and QuestValidator.validate(current_task, line, self.user_data):
+                        task_id = current_task["id"]
+                        reward = current_task.get("reward_sp", 1)
+                        self.user_data["science_points"] = self.user_data.get("science_points", 0) + reward
+                        self.user_data.setdefault("completed_tasks", []).append(task_id)
 
-                        if tech_id not in unlocked_techs or task_id in self.user_data["completed_tasks"]:
-                            continue
-
-                        if QuestValidator.validate(task, line, self.user_data):
-                            reward = task.get("reward_sp", 1)
-                            self.user_data["science_points"] += reward
-                            self.user_data["completed_tasks"].append(task_id)
-
-                            max_sp = sum(t.get("reward_sp", 1) for t in self.tasks)
-                            self.console_lines.append(f"✅ ZADANIE ZALICZONE! (+{reward} SP)")
-                            self.console_lines.append(f"Punkty SP: {self.user_data['science_points']} / {max_sp}")
-                            self.manager.save_user_state(self.user_data)
-                            task_completed_now = True
-                            break
+                        _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
+                        self.manager.save_user_state(self.user_data)
+                        play_retro_victory_sound()
+                        self.show_bubble_notification(
+                            f"🌟 BRAWO! (+{reward} SP)",
+                            f"Zadanie zaliczone!\nSP: {tech_sp_earned} / {tech_total_sp}"
+                        )
+                        task_completed_now = True
 
                     if task_completed_now:
-                        print_next_available_task(self.tasks, self.user_data, self.console_lines)
                         self.check_tech_completion()
         else:
-            if event.unicode and event.unicode.isprintable():
+            if hasattr(event, "unicode") and event.unicode and event.unicode.isprintable():
                 self.input_text = self.input_text[:self.cursor_pos] + event.unicode + self.input_text[self.cursor_pos:]
                 self.cursor_pos += 1
         return True
 
     def draw(self, screen, width, height):
+        # --- DYSKRETNY PASEK STATUSU (HUD) ---
+        hud_height = 34
+        pygame.draw.rect(screen, (20, 20, 42), (0, 0, width, hud_height))
+        pygame.draw.line(screen, (50, 50, 85), (0, hud_height), (width, hud_height), 1)
+
+        if self.user_data and self.current_state == self.STATE_CONSOLE:
+            active_task = self.get_current_active_task()
+            if active_task:
+                mission_text = f"🎯 MISJA: {active_task['title']}"
+            else:
+                mission_text = "🎉 WSZYSTKIE DOSTĘPNE ZADANIA ZALICZONE!"
+
+            _, tech_sp_earned, tech_total_sp = self.get_active_tech_info()
+            sp_text = f"⭐ SP: {tech_sp_earned}/{tech_total_sp}  |  GRACZ: {self.user_data.get('first_name', '')}"
+
+            mission_surf = self.hud_font.render(mission_text, True, (255, 215, 0))
+            sp_surf = self.hud_font.render(sp_text, True, (130, 200, 255))
+
+            screen.blit(mission_surf, (25, 7))
+            screen.blit(sp_surf, (max(width - sp_surf.get_width() - 25, 300), 7))
+        else:
+            logo_surf = self.hud_font.render("KOK BASIC - Retro Emulator Edukacyjny", True, (140, 140, 180))
+            screen.blit(logo_surf, (25, 7))
+
         line_height = 30
-        max_lines = (height - 120) // line_height
+        max_lines = (height - hud_height - 110) // line_height
         visible_lines = self.console_lines[-max_lines:]
         num_lines = len(visible_lines)
         bottom_limit = height - 90
         start_y = bottom_limit - (num_lines * line_height)
-        y_offset = max(40, start_y)
+        y_offset = max(hud_height + 15, start_y)
         
         for line in visible_lines:
-            if line.startswith("ZADANIE:") or line.startswith("CO ZROBIĆ:"):
-                color = (255, 215, 0)
-            elif "HURA" in line or "⭐" in line:
+            if "HURA" in line or "⭐" in line:
                 color = (255, 105, 180)
             elif line.startswith("⚠️") or line.startswith("🗑️") or "SYNTAX ERROR" in line or line.startswith("❌"):
                 color = (255, 100, 100)
@@ -382,6 +479,74 @@ class RetroConsoleManager:
             text_surface = self.font.render(line, True, color)
             screen.blit(text_surface, (50, y_offset))
             y_offset += line_height
+
+        # --- DYMEK MISJI I POWIADOMIEŃ (PRAWY GÓRNY RÓG) ---
+        if self.user_data and self.current_state == self.STATE_CONSOLE:
+            if not self.bubble_visible:
+                badge_text = "[F1] Pokaż misję 💬"
+                badge_surf = self.bubble_font.render(badge_text, True, (160, 170, 210))
+                bx = width - badge_surf.get_width() - 30
+                by = hud_height + 14
+                bg_rect = (bx - 10, by - 4, badge_surf.get_width() + 20, badge_surf.get_height() + 8)
+                pygame.draw.rect(screen, (22, 25, 48), bg_rect, border_radius=6)
+                pygame.draw.rect(screen, (60, 70, 110), bg_rect, width=1, border_radius=6)
+                screen.blit(badge_surf, (bx, by))
+            else:
+                bubble_width = 400
+                bubble_x = width - bubble_width - 30
+                bubble_y = hud_height + 14
+
+                if self.bubble_notification and self.bubble_notification.get("timer", 0) > 0:
+                    self.bubble_notification["timer"] -= 1
+                    header_text = self.bubble_notification["title"]
+                    header_color = (110, 255, 130)
+                    bg_color = (16, 38, 24, 235)
+                    border_color = (70, 220, 100)
+                    body_raw = self.bubble_notification["message"]
+                else:
+                    active_task = self.get_current_active_task()
+                    if active_task:
+                        header_text = f"💬 {active_task['title']}"
+                        header_color = (255, 215, 60)
+                        bg_color = (18, 22, 46, 235)
+                        border_color = (190, 160, 70)
+                        body_raw = active_task.get("instruction", "")
+                    else:
+                        header_text = "🎉 POZIOM UKOŃCZONY!"
+                        header_color = (255, 120, 200)
+                        bg_color = (25, 20, 48, 235)
+                        border_color = (180, 80, 150)
+                        body_raw = "Wszystkie dostępne zadania w tym poziomie zostały zaliczone."
+
+                body_lines = []
+                for paragraph in body_raw.split("\n"):
+                    body_lines.extend(wrap_text(paragraph, self.bubble_font, bubble_width - 32))
+
+                line_h = 22
+                title_surf = self.bubble_font.render(header_text, True, header_color)
+                if title_surf.get_width() > bubble_width - 32:
+                    short_header = header_text[:32] + "..."
+                    title_surf = self.bubble_font.render(short_header, True, header_color)
+
+                content_h = 14 + title_surf.get_height() + 8 + (len(body_lines) * line_h) + 26
+                bubble_surf = pygame.Surface((bubble_width, content_h), pygame.SRCALPHA)
+                pygame.draw.rect(bubble_surf, bg_color, (0, 0, bubble_width, content_h), border_radius=8)
+                pygame.draw.rect(bubble_surf, border_color, (0, 0, bubble_width, content_h), width=2, border_radius=8)
+
+                bubble_surf.blit(title_surf, (16, 10))
+                div_y = 10 + title_surf.get_height() + 5
+                pygame.draw.line(bubble_surf, (border_color[0]//2, border_color[1]//2, border_color[2]//2), (16, div_y), (bubble_width - 16, div_y), 1)
+
+                curr_y = div_y + 8
+                for bl in body_lines:
+                    b_surf = self.bubble_font.render(bl, True, (220, 225, 245))
+                    bubble_surf.blit(b_surf, (16, curr_y))
+                    curr_y += line_h
+
+                hint_surf = self.bubble_font.render("[F1] Schowaj", True, (110, 120, 160))
+                bubble_surf.blit(hint_surf, (bubble_width - hint_surf.get_width() - 14, content_h - 20))
+
+                screen.blit(bubble_surf, (bubble_x, bubble_y))
 
         prompt_symbol = "KOK-BASIC> " if self.current_state == self.STATE_CONSOLE else ">> "
         if self.current_state == self.STATE_CONFIRM_RESET:

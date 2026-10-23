@@ -18,7 +18,7 @@ def console_manager(tmp_path):
     
     console = RetroConsoleManager(mock_font)
     # Wskazujemy unikalny katalog tymczasowy dla każdego testu
-    console.manager.users_dir = str(tmp_path / "users")
+    console.manager.data_dir = str(tmp_path / "users")
     return console
 
 def create_key_event(key, unicode_char=""):

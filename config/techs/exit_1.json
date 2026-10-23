@@ -4,6 +4,14 @@
   "cost": 5,
   "requires": ["VARS_1"],
   "unlocks_commands": ["exit"],
-  "tasks": []
+  "tasks": [
+    {
+      "id": "exit_task",
+      "title": "Wyjście i powrót do programu",
+      "instruction": "Wpisz polecenie EXIT i wciśnij ENTER, aby wyjść z programu. Następnie włącz program i zaloguj się ponownie!",
+      "reward_sp": 5,
+      "validation": { "type": "exit_restart" },
+      "test_input": "EXIT"
+    }
+  ]
 }
-

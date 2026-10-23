@@ -10,35 +10,40 @@
       "title": "Pierwsze czyszczenie ekranu",
       "instruction": "Wpisz komendę CLS i wciśnij ENTER, aby wyczyścić ekran.",
       "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "CLS" }
+      "validation": { "type": "command_prefix", "target": "CLS" },
+      "test_input": "CLS"
     },
     {
       "id": "cls_smile_face",
       "title": "Narysuj uśmiechniętą buźkę",
       "instruction": "Wpisz PRINT \":-)\" w cudzysłowie i wciśnij ENTER.",
       "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true }
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \":-)\""
     },
     {
       "id": "cls_second",
       "title": "Czas na czyszczenie",
       "instruction": "Użyj polecenia CLS po raz drugi, aby wyczyścić narysowaną buźkę.",
       "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "CLS" }
+      "validation": { "type": "command_prefix", "target": "CLS" },
+      "test_input": "CLS"
     },
     {
       "id": "cls_wink_face",
       "title": "Narysuj puszczającą oko buźkę",
       "instruction": "Wpisz PRINT \";-)\" w cudzysłowie i zatwierdź klawiszem ENTER.",
       "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true }
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \";-)\""
     },
     {
       "id": "cls_final",
       "title": "Wielki finał czyszczenia",
       "instruction": "Wyczyść ekran komendą CLS jako podsumowanie całego poziomu CLS.",
       "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "CLS" }
+      "validation": { "type": "command_prefix", "target": "CLS" },
+      "test_input": "CLS"
     }
   ]
 }

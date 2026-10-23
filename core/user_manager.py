@@ -7,7 +7,15 @@ class UserManager:
     
     def __init__(self, data_dir: str = "data/users"):
         self.data_dir = data_dir
-        os.makedirs(self.data_dir, exist_ok=True)  # mały błąd składniowy zabezpieczający, użyjemy standardowego os.makedirs
+        os.makedirs(self.data_dir, exist_ok=True)
+
+    @property
+    def users_dir(self) -> str:
+        return self.data_dir
+
+    @users_dir.setter
+    def users_dir(self, value: str):
+        self.data_dir = value
         os.makedirs(self.data_dir, exist_ok=True)
 
     def _get_user_filepath(self, username: str) -> str:
@@ -28,6 +36,7 @@ class UserManager:
 
     def register_user(self, username: str, first_name: str, last_name: str, age: int, password: str) -> dict:
         """Tworzy nowy profil użytkownika i zapisuje go w pliku JSON."""
+        os.makedirs(self.data_dir, exist_ok=True)
         filepath = self.get_user_filepath(username)
         
         user_data = {
@@ -66,6 +75,7 @@ class UserManager:
         username = user_data.get("username")
         if not username:
             return
+        os.makedirs(self.data_dir, exist_ok=True)
         filepath = self.get_user_filepath(username)
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(user_data, f, ensure_ascii=False, indent=4)

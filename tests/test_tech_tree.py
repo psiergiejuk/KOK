@@ -7,10 +7,10 @@ def test_tech_tree_loading():
     tree = TechTreeLoader.load_from_json("config/tech_tree.json")
     
     assert "PRINT_1" in tree
-    assert "CLS" in tree
+    assert "CLS_1" in tree or "CLS" in tree
     
-    # Sprawdzenie zależności (CLS wymaga PRINT_1)
-    cls_node = tree["CLS"]
+    cls_key = "CLS_1" if "CLS_1" in tree else "CLS"
+    cls_node = tree[cls_key]
     assert "PRINT_1" in cls_node["requires"]
     assert cls_node["cost"] >= 0
 

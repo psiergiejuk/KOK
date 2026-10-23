@@ -10,28 +10,32 @@
       "title": "Jak masz na imię?",
       "instruction": "Wpisz polecenie PRINT, a swoje imię koniecznie ujmij w cudzysłów (np. PRINT \"Kuba\") i wciśnij ENTER.",
       "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true }
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \"KUBA\""
     },
     {
       "id": "print_age",
       "title": "Ile masz lat?",
       "instruction": "Użyj polecenia PRINT i wpisz swój wiek jako liczbę (np. PRINT 9), a następnie wciśnij ENTER.",
       "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false }
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 9"
     },
     {
       "id": "print_color",
       "title": "Jaki jest Twój ulubiony kolor?",
       "instruction": "Wpisz PRINT oraz swój ulubiony kolor w cudzysłowie (np. PRINT \"Zielony\") i wciśnij ENTER.",
       "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true }
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \"ZIELONY\""
     },
     {
       "id": "print_repeat_5",
       "title": "Czy potrafisz powtórzyć polecenie PRINT bezbłędnie 5 razy?",
       "instruction": "Wykonaj komendę PRINT pięć razy z rzędu (każdą zatwierdź klawiszem ENTER).",
       "reward_sp": 2,
-      "validation": { "type": "counter", "target_command": "PRINT", "required_count": 5 }
+      "validation": { "type": "counter", "target_command": "PRINT", "required_count": 5 },
+      "test_input": ["PRINT \"a\"", "PRINT \"a\"", "PRINT \"a\"", "PRINT \"a\"", "PRINT \"a\""]
     }
   ]
 }
