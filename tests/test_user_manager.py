@@ -22,7 +22,7 @@ def test_user_registration_and_exists(temp_user_manager):
     
     assert temp_user_manager.user_exists(username) is True
     assert user_data["science_points"] == 0
-    assert "PRINT_1" in user_data["unlocked_techs"]
+    assert "HELP_1" in user_data["unlocked_techs"]
 
 def test_successful_authentication(temp_user_manager):
     """Testuje poprawne logowanie przy dobrym haśle."""

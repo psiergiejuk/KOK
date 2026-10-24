@@ -1,169 +1,130 @@
 {
   "id": "MATH_1",
-  "name": "Matematyka BASIC - 20 wyzwań",
-  "cost": 5,
-  "requires": ["CLS_1"],
-  "unlocks_commands": ["print", "cls"],
+  "name": "MATH - Kalkulator BASIC (+ - * /)",
+  "cost": 10,
+  "requires": ["TAB_1", "CLS_1", "HISTORY_1"],
+  "unlocks_commands": ["math"],
   "tasks": [
     {
-      "id": "math_1",
-      "title": "Zadanie 1: Dodawanie 2 + 2",
-      "instruction": "Wpisz PRINT 2 + 2 i wciśnij ENTER.",
+      "id": "help_math",
+      "title": "Sprawdź jak liczy komputer",
+      "instruction": "Czas zamienić komputer w super-kalkulator! Sprawdź w pomocy jakich znaków używamy do liczenia: wpisz HELP MATH (możesz użyć H + TAB!) i wciśnij ENTER.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "HELP" },
+      "test_input": "HELP MATH"
+    },
+    {
+      "id": "math_add_1",
+      "title": "1. Pierwsze dodawanie",
+      "instruction": "Aby komputer coś policzył i pokazał wynik na ekranie (w konsoli), używamy komendy PRINT. Dodaj 2 + 2 wpisując: PRINT 2 + 2 (lub P + TAB i 2 + 2)!",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
       "test_input": "PRINT 2 + 2"
     },
     {
-      "id": "math_2",
-      "title": "Zadanie 2: Odejmowanie 10 - 5",
-      "instruction": "Wpisz PRINT 10 - 5 i zatwierdź.",
+      "id": "math_add_2",
+      "title": "2. Klocki w pudełku",
+      "instruction": "Masz 15 klocków i dokładasz jeszcze 10. Dodaj 15 + 10 i wypisz wynik na ekranie (pamiętaj o komendzie PRINT)!",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 10 - 5"
+      "test_input": "PRINT 15 + 10"
     },
     {
-      "id": "math_3",
-      "title": "Zadanie 3: Mnożenie 3 * 4",
-      "instruction": "Wpisz PRINT 3 * 4 i wciśnij ENTER.",
+      "id": "math_sub_1",
+      "title": "3. Odejmowanie",
+      "instruction": "Odejmij 10 - 3 i wypisz wynik na ekranie (w konsoli)!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 10 - 3"
+    },
+    {
+      "id": "math_sub_2",
+      "title": "4. Kieszonkowe",
+      "instruction": "Miałeś 50 złotych kieszonkowego i wydałeś 20 złotych. Oblicz 50 - 20 i wypisz wynik w konsoli!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 50 - 20"
+    },
+    {
+      "id": "math_mul_1",
+      "title": "5. Mnożenie z gwiazdką (*)",
+      "instruction": "W komputerze znak mnożenia to GWIAZDKA (*). Pomnóż 3 * 4 i wypisz wynik w konsoli!",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
       "test_input": "PRINT 3 * 4"
     },
     {
-      "id": "math_4",
-      "title": "Zadanie 4: Dzielenie 8 / 2",
-      "instruction": "Wpisz PRINT 8 / 2 i zatwierdź.",
+      "id": "math_div_1",
+      "title": "6. Dzielenie z ukośnikiem (/)",
+      "instruction": "Znak dzielenia na klawiaturze to UKOŚNIK (/). Podziel 8 / 2 i wypisz wynik w konsoli!",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
       "test_input": "PRINT 8 / 2"
     },
     {
-      "id": "math_5",
-      "title": "Zadanie 5: Porządki na ekranie",
-      "instruction": "Wyczyść ekran komendą CLS.",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "CLS" },
-      "test_input": "CLS"
-    },
-    {
-      "id": "math_6",
-      "title": "Zadanie 6: Wynik 5 + 5",
-      "instruction": "Wpisz PRINT 5 + 5",
+      "id": "math_brackets",
+      "title": "7. Zagadka z nawiasami",
+      "instruction": "Tak jak w szkole, nawiasy liczą się pierwsze! Oblicz (2 + 3) * 2 i wypisz wynik w konsoli!",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 5 + 5"
+      "test_input": "PRINT (2 + 3) * 2"
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "q_math_1",
+      "question": "Jakiego znaku używamy w programowaniu do MNOŻENIA dwóch liczb?",
+      "options": [
+        "Gwiazdki ( * )",
+        "Kropki ( . )",
+        "Krzyżyka ( # )",
+        "Dolara ( $ )"
+      ],
+      "correct": 1
     },
     {
-      "id": "math_7",
-      "title": "Zadanie 7: Wynik 20 - 7",
-      "instruction": "Wpisz PRINT 20 - 7",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 20 - 7"
+      "id": "q_math_2",
+      "question": "Jakiego znaku używamy w programowaniu do DZIELENIA liczb?",
+      "options": [
+        "Dwukropka ( : )",
+        "Ukośnika ( / )",
+        "Minusa ( - )",
+        "Przecinka ( , )"
+      ],
+      "correct": 2
     },
     {
-      "id": "math_8",
-      "title": "Zadanie 8: Wynik 6 * 6",
-      "instruction": "Wpisz PRINT 6 * 6",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 6 * 6"
+      "id": "q_math_3",
+      "question": "Co trzeba napisać przed działaniem 5 + 5, aby komputer wyświetlił wynik w konsoli?",
+      "options": [
+        "CLS 5 + 5",
+        "PRINT 5 + 5",
+        "HELP 5 + 5",
+        "HISTORY 5 + 5"
+      ],
+      "correct": 2
     },
     {
-      "id": "math_9",
-      "title": "Zadanie 9: Wynik 9 / 3",
-      "instruction": "Wpisz PRINT 9 / 3",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 9 / 3"
+      "id": "q_math_err_1",
+      "question": "Widzisz w konsoli komunikat: \"SYNTAX ERROR: Dzielenie przez zero nie jest dozwolone!\". Co oznacza ten błąd?",
+      "options": [
+        "Próbowałeś podzielić liczbę przez 0 (np. PRINT 10 / 0), a w matematyce przez zero dzielić nie wolno",
+        "Zero jest za małą cyfrą na ekranie",
+        "Zepsuł się klawisz z zerem",
+        "Trzeba wpisać dwa zera zamiast jednego"
+      ],
+      "correct": 1
     },
     {
-      "id": "math_10",
-      "title": "Zadanie 10: Kolejne czyszczenie",
-      "instruction": "Użyj komendy CLS.",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "CLS" },
-      "test_input": "CLS"
-    },
-    {
-      "id": "math_11",
-      "title": "Zadanie 11: Dodawanie 15 + 15",
-      "instruction": "Wpisz PRINT 15 + 15",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 15 + 15"
-    },
-    {
-      "id": "math_12",
-      "title": "Zadanie 12: Odejmowanie 50 - 25",
-      "instruction": "Wpisz PRINT 50 - 25",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 50 - 25"
-    },
-    {
-      "id": "math_13",
-      "title": "Zadanie 13: Mnożenie 7 * 8",
-      "instruction": "Wpisz PRINT 7 * 8",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 7 * 8"
-    },
-    {
-      "id": "math_14",
-      "title": "Zadanie 14: Dzielenie 100 / 10",
-      "instruction": "Wpisz PRINT 100 / 10",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 100 / 10"
-    },
-    {
-      "id": "math_15",
-      "title": "Zadanie 15: Czysty ekran",
-      "instruction": "Wpisz CLS",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "CLS" },
-      "test_input": "CLS"
-    },
-    {
-      "id": "math_16",
-      "title": "Zadanie 16: Dodawanie 111 + 222",
-      "instruction": "Wpisz PRINT 111 + 222",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 111 + 222"
-    },
-    {
-      "id": "math_17",
-      "title": "Zadanie 17: Odejmowanie 99 - 33",
-      "instruction": "Wpisz PRINT 99 - 33",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 99 - 33"
-    },
-    {
-      "id": "math_18",
-      "title": "Zadanie 18: Mnożenie 9 * 9",
-      "instruction": "Wpisz PRINT 9 * 9",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 9 * 9"
-    },
-    {
-      "id": "math_19",
-      "title": "Zadanie 19: Dzielenie 81 / 9",
-      "instruction": "Wpisz PRINT 81 / 9",
-      "reward_sp": 1,
-      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
-      "test_input": "PRINT 81 / 9"
-    },
-    {
-      "id": "math_20",
-      "title": "Zadanie 20: Wielki Finał Matematyczny",
-      "instruction": "Wyczyść ekran komendą CLS, aby ukończyć cały moduł matematyczny!",
-      "reward_sp": 2,
-      "validation": { "type": "command_prefix", "target": "CLS" },
-      "test_input": "CLS"
+      "id": "q_math_err_2",
+      "question": "Widzisz komunikat: \"SYNTAX ERROR: Nieznana komenda '2'\". Dlaczego komputer nie policzył wpisanych samych cyfr '2 + 2'?",
+      "options": [
+        "Bo na początku zabrakło komendy PRINT (powinno być: PRINT 2 + 2)",
+        "Bo komputer nie zna cyfry 2",
+        "Bo dodawanie jest zablokowane",
+        "Bo trzeba pisać słownie DWA PLUS DWA"
+      ],
+      "correct": 1
     }
   ]
 }

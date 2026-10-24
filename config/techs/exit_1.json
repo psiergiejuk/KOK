@@ -1,17 +1,60 @@
 {
   "id": "EXIT_1",
   "name": "EXIT - Bezpieczne zamykanie",
-  "cost": 5,
-  "requires": ["VARS_1"],
+  "cost": 10,
+  "requires": ["FOR_1"],
   "unlocks_commands": ["exit"],
   "tasks": [
     {
+      "id": "help_exit",
+      "title": "Sprawdź jak działa EXIT",
+      "instruction": "Odblokowałeś finałową komendę EXIT! Sprawdź w pomocy co robi ta komenda, wpisując HELP EXIT i wciskając ENTER.",
+      "reward_sp": 2,
+      "validation": { "type": "command_prefix", "target": "HELP" },
+      "test_input": "HELP EXIT"
+    },
+    {
       "id": "exit_task",
       "title": "Wyjście i powrót do programu",
-      "instruction": "Wpisz polecenie EXIT i wciśnij ENTER, aby wyjść z programu. Następnie włącz program i zaloguj się ponownie!",
+      "instruction": "Wyłącz bezpiecznie komputer poznaną komendą, a następnie uruchom program i zaloguj się ponownie!",
       "reward_sp": 5,
       "validation": { "type": "exit_restart" },
       "test_input": "EXIT"
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "q_exit_1",
+      "question": "Co robi komenda EXIT przed zamknięciem emulatora KOK BASIC?",
+      "options": [
+        "Zapisuje Twoje postępy i bezpiecznie wyłącza program",
+        "Kasuje profil gracza",
+        "Formatuje dysk",
+        "Nic nie robi"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q_exit_2",
+      "question": "Jak nazywa się język programowania, którego podstaw właśnie się nauczyłeś?",
+      "options": [
+        "BASIC",
+        "HISZPAŃSKI",
+        "KALKULATOR",
+        "MORS"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q_exit_3",
+      "question": "Która komenda służy do sprawdzania opisu dowolnego polecenia, gdy czegoś zapomnisz?",
+      "options": [
+        "HELP",
+        "CLS",
+        "PRINT",
+        "EXIT"
+      ],
+      "correct": 1
     }
   ]
 }

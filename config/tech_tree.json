@@ -1,10 +1,20 @@
 {
   "technologies_files": [
+    "config/techs/help_1.json",
     "config/techs/print_1.json",
+    "config/techs/tab_1.json",
     "config/techs/cls_1.json",
+    "config/techs/history_1.json",
     "config/techs/math_1.json",
-    "config/techs/numbers_1.json",
-    "config/techs/vars_1.json",
+    "config/techs/type_str.json",
+    "config/techs/type_int.json",
+    "config/techs/type_float.json",
+    "config/techs/type_bool.json",
+    "config/techs/var_str.json",
+    "config/techs/var_int.json",
+    "config/techs/var_float.json",
+    "config/techs/var_bool.json",
+    "config/techs/for_1.json",
     "config/techs/exit_1.json"
   ]
 }

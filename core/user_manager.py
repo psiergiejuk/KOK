@@ -46,7 +46,7 @@ class UserManager:
             "age": int(age),
             "password_hash": self._hash_password(password),
             "science_points": 0,
-            "unlocked_techs": ["PRINT_1"],
+            "unlocked_techs": ["HELP_1"],
             "completed_tasks": [],
             "action_counts": {}
         }

@@ -22,6 +22,8 @@ class QuestValidator:
             if not parts:
                 return False
             cmd = parts[0].upper()
+            if cmd == "CLR":
+                cmd = "CLS"
             
             # Obsługa przypisań bez spacji, np. A=5 gdy target to "A"
             if "=" in parts[0] and not parts[0].upper().startswith("LET"):
@@ -30,8 +32,8 @@ class QuestValidator:
             if cmd != target:
                 return False
                 
-            # Komendy oczekujące argumentów (np. PRINT) nie mogą być puste
-            if target not in ["CLS", "EXIT"] and len(parts) < 2 and "=" not in command_line:
+            # Komendy oczekujące argumentów (np. PRINT, HELP) nie mogą być puste
+            if target not in ["CLS", "EXIT", "HISTORY", "TAB"] and len(parts) < 2 and "=" not in command_line:
                 return False
                 
             if require_quotes:
@@ -48,6 +50,8 @@ class QuestValidator:
                 test_input = task.get("test_input")
                 if test_input:
                     norm_user = normalize_code(command_line)
+                    if norm_user == "CLR":
+                        norm_user = "CLS"
                     if isinstance(test_input, str):
                         if norm_user != normalize_code(test_input):
                             return False

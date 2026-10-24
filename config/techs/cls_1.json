@@ -1,49 +1,111 @@
 {
   "id": "CLS_1",
-  "name": "CLS - Czyszczenie ekranu",
-  "cost": 5,
+  "name": "CLS - Czyszczenie ekranu (konsoli)",
+  "cost": 10,
   "requires": ["PRINT_1"],
   "unlocks_commands": ["cls"],
   "tasks": [
     {
+      "id": "help_cls",
+      "title": "Sprawdź jak wyczyścić ekran",
+      "instruction": "Nowa komenda: CLS! Sprawdź w księdze podpowiedzi, jak zrobić porządek na zielonym ekranie (w konsoli). Wpisz HELP CLS i wciśnij ENTER.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "HELP" },
+      "test_input": ["HELP CLS", "HELP CLR"]
+    },
+    {
       "id": "cls_first",
-      "title": "Pierwsze czyszczenie ekranu",
-      "instruction": "Wpisz komendę CLS i wciśnij ENTER, aby wyczyścić ekran.",
+      "title": "Pierwsze sprzątanie ekranu",
+      "instruction": "Wpisz komendę CLS i wciśnij ENTER, aby zetrzeć wszystkie napisy z ekranu jak gąbką z tablicy!",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "CLS" },
       "test_input": "CLS"
     },
     {
       "id": "cls_smile_face",
-      "title": "Narysuj uśmiechniętą buźkę",
-      "instruction": "Wpisz PRINT \":-)\" w cudzysłowie i wciśnij ENTER.",
+      "title": "Uśmiechnięta buźka w konsoli",
+      "instruction": "Ekran jest czysty! Wypisz na nim (używając komendy PRINT) uśmiechniętą buźkę \":-)\" w cudzysłowie.",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
       "test_input": "PRINT \":-)\""
     },
     {
       "id": "cls_second",
-      "title": "Czas na czyszczenie",
-      "instruction": "Użyj polecenia CLS po raz drugi, aby wyczyścić narysowaną buźkę.",
+      "title": "Zetrzyj buźkę",
+      "instruction": "Teraz znów wyczyść ekran komendą CLS!",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "CLS" },
       "test_input": "CLS"
     },
     {
       "id": "cls_wink_face",
-      "title": "Narysuj puszczającą oko buźkę",
-      "instruction": "Wpisz PRINT \";-)\" w cudzysłowie i zatwierdź klawiszem ENTER.",
+      "title": "Buźka puszczająca oczko",
+      "instruction": "Wypisz w konsoli (komendą PRINT) buźkę puszczającą oko \";-)\" w cudzysłowie.",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
       "test_input": "PRINT \";-)\""
     },
     {
-      "id": "cls_final",
-      "title": "Wielki finał czyszczenia",
-      "instruction": "Wyczyść ekran komendą CLS jako podsumowanie całego poziomu CLS.",
+      "id": "cls_third",
+      "title": "Trzecie czyszczenie",
+      "instruction": "Wyczyść ekran komendą CLS (jeśli masz już odblokowany klawisz TAB, możesz wpisać samo C i nacisnąć TAB!).",
       "reward_sp": 1,
       "validation": { "type": "command_prefix", "target": "CLS" },
       "test_input": "CLS"
+    },
+    {
+      "id": "cls_final",
+      "title": "Wielki finał sprzątania",
+      "instruction": "Na koniec poziomu zrób idealny porządek na ekranie komendą CLS!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "CLS" },
+      "test_input": "CLS"
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "q_cls_1",
+      "question": "Co robi komenda CLS (lub jej skrót CLR)?",
+      "options": [
+        "Wypisuje imię gracza",
+        "Czyści cały ekran konsoli ze starych napisów",
+        "Dodaje dwie liczby",
+        "Zamyka grę"
+      ],
+      "correct": 2
+    },
+    {
+      "id": "q_cls_2",
+      "question": "Do czego ze szkoły najbardziej podobna jest komenda CLS?",
+      "options": [
+        "Do gąbki ścierającej zapisaną tablicę",
+        "Do dzwonka na przerwę",
+        "Do plecaka",
+        "Do linijki"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q_cls_3",
+      "question": "Czy po komendzie CLS trzeba dopisywać jakieś słowa w cudzysłowie?",
+      "options": [
+        "Tak, trzeba wpisać CLS \"EKRAN\"",
+        "Nie, wystarczy wpisać samo CLS i nacisnąć ENTER",
+        "Trzeba wpisać swoją datę urodzenia",
+        "Trzeba wpisać trzy gwiazdki"
+      ],
+      "correct": 2
+    },
+    {
+      "id": "q_cls_err",
+      "question": "Chcesz wyczyścić ekran, ale wpisujesz omyłkowo: CLSS i pojawia się czerwone: SYNTAX ERROR: UNKNOWN COMMAND 'CLSS'. Co robisz?",
+      "options": [
+        "Wpisuję poprawnie komendę CLS (przez jedno S) lub skrót CLR",
+        "Przecieram monitor chusteczką",
+        "Odłączam klawiaturę",
+        "Czekam 10 minut"
+      ],
+      "correct": 1
     }
   ]
 }

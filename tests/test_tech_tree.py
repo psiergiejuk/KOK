@@ -6,8 +6,10 @@ def test_tech_tree_loading():
     # Przykładowe załadowanie drzewa (można wskazać plik testowy lub mock)
     tree = TechTreeLoader.load_from_json("config/tech_tree.json")
     
+    assert "HELP_1" in tree
     assert "PRINT_1" in tree
     assert "CLS_1" in tree or "CLS" in tree
+    assert "HELP_1" in tree["PRINT_1"]["requires"]
     
     cls_key = "CLS_1" if "CLS_1" in tree else "CLS"
     cls_node = tree[cls_key]
