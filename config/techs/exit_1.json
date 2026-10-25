@@ -2,7 +2,7 @@
   "id": "EXIT_1",
   "name": "EXIT - Bezpieczne zamykanie",
   "cost": 10,
-  "requires": ["FOR_1"],
+  "requires": ["PROG_1"],
   "unlocks_commands": ["exit"],
   "tasks": [
     {

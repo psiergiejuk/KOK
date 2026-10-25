@@ -3,16 +3,79 @@ import re
 def normalize_code(s: str) -> str:
     """Normalizuje komendę: wielkie litery, redukcja spacji, usunięcie spacji wokół operatorów."""
     s = re.sub(r'\s+', ' ', s.strip().upper())
-    s = re.sub(r'\s*([=+\-*/(),])\s*', r'\1', s)
+    s = re.sub(r'\s*([=+\-*/(),;])\s*', r'\1', s)
     return s
 
 class QuestValidator:
+    @staticmethod
+    def validate_program_run_with_feedback(task: dict, user_data: dict) -> tuple[bool, str | None]:
+        """
+        Weryfikuje wielolinijkowy program napisany w EDIT i uruchomiony komendą RUN.
+        Zwraca (czy_zaliczone, wskazówka_profesora_gdy_brakuje_elementu).
+        """
+        val_cfg = task.get("validation", {})
+        if "program_lines" in user_data:
+            raw_lines = user_data.get("program_lines") or []
+        else:
+            raw_lines = task.get("sample_program") or []
+
+        clean_lines = [
+            re.sub(r'^\d+\s+', '', l).strip()
+            for l in raw_lines
+            if l and l.strip() and not l.strip().upper().startswith("REM")
+        ]
+
+        if not clean_lines:
+            return False, (
+                "🤖 PROFESOR KOK-88: Kartka w edytorze jest pusta jak brzuch przed śniadaniem! "
+                "Wpisz EDIT, napisz program, wyjdź klawiszem ESC i wpisz RUN."
+            )
+
+        min_lines = val_cfg.get("min_lines", 2)
+        if len(clean_lines) < min_lines:
+            return False, (
+                f"🤖 PROFESOR KOK-88: Twój program ma dopiero {len(clean_lines)} linijkę, "
+                f"a w tym zadaniu potrzebujemy co najmniej {min_lines} linijek kodu w EDIT!"
+            )
+
+        upper_code = "\n".join(clean_lines).upper()
+
+        for kw in val_cfg.get("required_keywords", []):
+            if kw.upper() not in upper_code:
+                custom_hint = val_cfg.get(
+                    "hint",
+                    f"W Twoim programie w EDIT brakuje jeszcze elementu: {kw.upper()}!"
+                )
+                return False, f"🤖 WSKAZÓWKA PROFESORA: {custom_hint}"
+
+        for group in val_cfg.get("any_keywords", []):
+            if not any(opt.upper() in upper_code for opt in group):
+                opts_str = " lub ".join(group)
+                custom_hint = val_cfg.get(
+                    "hint",
+                    f"Użyj w programie przynajmniej jednej z komend: {opts_str}!"
+                )
+                return False, f"🤖 WSKAZÓWKA PROFESORA: {custom_hint}"
+
+        if val_cfg.get("require_quotes", False):
+            if not ('"' in upper_code or "'" in upper_code):
+                return False, "🤖 WSKAZÓWKA PROFESORA: Pamiętaj o cudzysłowie \"...\" wokół wypisywanego napisu!"
+
+        return True, None
+
     @staticmethod
     def validate(task, command_line, user_data) -> bool:
         v_type = task["validation"]["type"]
 
         if v_type == "exit_restart":
             return command_line.strip().upper() == "EXIT"
+
+        elif v_type == "program_run":
+            cmd_word = command_line.strip().split()[0].upper() if command_line.strip() else ""
+            if cmd_word not in ("RUN", "CHECK", "OCEN"):
+                return False
+            passed, _ = QuestValidator.validate_program_run_with_feedback(task, user_data)
+            return passed
         
         elif v_type == "command_prefix":
             target = task["validation"]["target"].upper()
@@ -33,7 +96,12 @@ class QuestValidator:
                 return False
                 
             # Komendy oczekujące argumentów (np. PRINT, HELP) nie mogą być puste
-            if target not in ["CLS", "EXIT", "HISTORY", "TAB"] and len(parts) < 2 and "=" not in command_line:
+            no_arg_cmds = [
+                "CLS", "EXIT", "HISTORY", "TAB", "DATE", "TIME",
+                "VARS", "CLEAR", "IN", "BEEP", "RANDOMIZE", "END", "WEND",
+                "NEW", "EDIT", "LIST", "SAVE", "FILES", "RUN", "CHECK", "HINT"
+            ]
+            if target not in no_arg_cmds and len(parts) < 2 and "=" not in command_line:
                 return False
                 
             if require_quotes:
