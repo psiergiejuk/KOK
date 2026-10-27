@@ -16,9 +16,9 @@ def console_manager(tmp_path):
     mock_font = MagicMock()
     mock_font.render.return_value = MagicMock()
     
-    console = RetroConsoleManager(mock_font)
-    # Wskazujemy unikalny katalog tymczasowy dla każdego testu
-    console.manager.data_dir = str(tmp_path / "users")
+    from core.user_manager import UserManager
+    user_mgr = UserManager(data_dir=str(tmp_path / "users"))
+    console = RetroConsoleManager(mock_font, user_manager=user_mgr)
     return console
 
 def create_key_event(key, unicode_char=""):
@@ -76,6 +76,11 @@ def test_full_registration_flow(console_manager):
     for char in "nowy_super_gracz":
         console_manager.handle_keydown(create_key_event(0, unicode_char=char))
     console_manager.handle_keydown(create_key_event(pygame.K_RETURN))
+    assert console_manager.current_state == console_manager.STATE_CONFIRM_REGISTER
+
+    # 1b. Potwierdzenie chęci utworzenia nowego konta (T)
+    console_manager.handle_keydown(create_key_event(0, unicode_char="T"))
+    console_manager.handle_keydown(create_key_event(pygame.K_RETURN))
     assert console_manager.current_state == console_manager.STATE_REG_FIRST
 
     # 2. Podanie imienia
@@ -96,7 +101,13 @@ def test_full_registration_flow(console_manager):
     console_manager.handle_keydown(create_key_event(pygame.K_RETURN))
     assert console_manager.current_state == console_manager.STATE_REG_PASS
 
-    # 5. Podanie hasła
+    # 5. Podanie hasła po raz pierwszy
+    for char in "tajne123":
+        console_manager.handle_keydown(create_key_event(0, unicode_char=char))
+    console_manager.handle_keydown(create_key_event(pygame.K_RETURN))
+    assert console_manager.current_state == console_manager.STATE_REG_PASS_CONFIRM
+
+    # 5b. Powtórzenie hasła
     for char in "tajne123":
         console_manager.handle_keydown(create_key_event(0, unicode_char=char))
     console_manager.handle_keydown(create_key_event(pygame.K_RETURN))

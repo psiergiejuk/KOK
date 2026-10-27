@@ -11,7 +11,16 @@ from core.commands.time_cmd import TimeCommand
 from core.commands.pause_cmd import PauseCommand
 from core.commands.vars_cmd import VarsCommand, ClearCommand
 from core.commands.if_cmd import IfCommand
-from core.commands.gfx_cmd import ColorCommand, PixelCommand, LineCommand, CircleCommand, RectCommand, TextCommand
+from core.commands.gfx_cmd import (
+    ColorCommand,
+    PixelCommand,
+    LineCommand,
+    CircleCommand,
+    RectCommand,
+    TextCommand,
+    ModeCommand,
+    GRAPHIC_MODES,
+)
 from core.commands.gpio_cmd import OutCommand, InCommand
 from core.commands.sound_cmd import BeepCommand, SoundCommand, PlayCommand
 from core.commands.basic_cmd import (
@@ -42,6 +51,7 @@ class CommandRegistry:
         self.variables = {}
         self.history = []
         self.graphics_items = []
+        self.current_mode = 0
         self.current_color = (80, 255, 120)
         self.gpio_pins = [False] * 8
         self.program_lines = [""]
@@ -74,6 +84,7 @@ class CommandRegistry:
         self.register(CircleCommand(self))
         self.register(RectCommand(self))
         self.register(TextCommand(self))
+        self.register(ModeCommand(self))
         self.register(OutCommand(self))
         self.register(InCommand(self))
         self.register(BeepCommand(self))
@@ -104,6 +115,25 @@ class CommandRegistry:
         self.commands[command_instance.name.upper()] = command_instance
         for alias in getattr(command_instance, "aliases", []):
             self.commands[alias.upper()] = command_instance
+
+    def get_mode_dimensions(self, mode: int = None) -> tuple[int, int]:
+        m = self.current_mode if mode is None else mode
+        info = GRAPHIC_MODES.get(m, GRAPHIC_MODES[0])
+        return info["width"], info["height"]
+
+    def is_mode_unlocked(self, mode: int) -> bool:
+        if mode == 0:
+            return True
+        info = GRAPHIC_MODES.get(mode)
+        if not info:
+            return False
+        tech_req = info.get("tech_req")
+        if not tech_req:
+            return True
+        if not self.active_user_data:
+            return True
+        unlocked = self.active_user_data.get("unlocked_techs", [])
+        return tech_req in unlocked
 
     def get_command_help(self, name: str) -> list[str] | None:
         cmd = self.commands.get(name.upper())

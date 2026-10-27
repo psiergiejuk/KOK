@@ -37,6 +37,28 @@ def test_counter_validation():
     player_state_ok = {"action_counts": {"PRINT": 2}}
     assert QuestValidator.validate(task, 'PRINT "B"', player_state_ok) is True
 
+def test_require_quotes_matching():
+    """Testuje, że zadanie wymagające cudzysłowu odrzuca niedomknięty cudzysłów."""
+    task = {
+        "id": "print_color",
+        "validation": {
+            "type": "command_prefix",
+            "target": "PRINT",
+            "require_quotes": True
+        }
+    }
+    # Poprawnie domknięty cudzysłów
+    assert QuestValidator.validate(task, 'PRINT "ZIELONY"', {}) is True
+    assert QuestValidator.validate(task, "PRINT 'NIEBIESKI'", {}) is True
+
+    # Niedomknięty cudzysłów (tylko 1 cudzysłów na początku)
+    assert QuestValidator.validate(task, 'PRINT "ZIELONY', {}) is False
+    assert QuestValidator.validate(task, "PRINT 'ZIELONY", {}) is False
+
+    # Całkowity brak cudzysłowu
+    assert QuestValidator.validate(task, 'PRINT ZIELONY', {}) is False
+
+
 def test_dynamic_plugin_missing_safely():
     """Testuje, czy moduł bezpiecznie obsługuje brak wtyczki."""
     task = {

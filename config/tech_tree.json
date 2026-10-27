@@ -23,10 +23,12 @@
     "config/techs/dim_1.json",
     "config/techs/gfx_1.json",
     "config/techs/color_1.json",
+    "config/techs/mode_1.json",
     "config/techs/gpio_1.json",
     "config/techs/sound_1.json",
     "config/techs/edit_1.json",
     "config/techs/prog_1.json",
-    "config/techs/exit_1.json"
+    "config/techs/exit_1.json",
+    "config/techs/teacher_1.json"
   ]
 }

@@ -58,7 +58,7 @@ class QuestValidator:
                 return False, f"🤖 WSKAZÓWKA PROFESORA: {custom_hint}"
 
         if val_cfg.get("require_quotes", False):
-            if not ('"' in upper_code or "'" in upper_code):
+            if not re.search(r'"[^"]*"|\'[^\']*\'', upper_code):
                 return False, "🤖 WSKAZÓWKA PROFESORA: Pamiętaj o cudzysłowie \"...\" wokół wypisywanego napisu!"
 
         return True, None
@@ -81,40 +81,47 @@ class QuestValidator:
             target = task["validation"]["target"].upper()
             require_quotes = task["validation"].get("require_quotes", False)
             
-            parts = command_line.strip().split(maxsplit=1)
-            if not parts:
+            clean_cmd = command_line.strip()
+            if not clean_cmd:
                 return False
-            cmd = parts[0].upper()
-            if cmd == "CLR":
-                cmd = "CLS"
-            
-            # Obsługa przypisań bez spacji, np. A=5 gdy target to "A"
-            if "=" in parts[0] and not parts[0].upper().startswith("LET"):
-                cmd = parts[0].split("=")[0].strip().upper()
 
-            if cmd != target:
-                return False
+            if " " in target:
+                if not clean_cmd.upper().startswith(target):
+                    return False
+            else:
+                parts = clean_cmd.split(maxsplit=1)
+                cmd = parts[0].upper()
+                if cmd == "CLR":
+                    cmd = "CLS"
                 
-            # Komendy oczekujące argumentów (np. PRINT, HELP) nie mogą być puste
-            no_arg_cmds = [
-                "CLS", "EXIT", "HISTORY", "TAB", "DATE", "TIME",
-                "VARS", "CLEAR", "IN", "BEEP", "RANDOMIZE", "END", "WEND",
-                "NEW", "EDIT", "LIST", "SAVE", "FILES", "RUN", "CHECK", "HINT"
-            ]
-            if target not in no_arg_cmds and len(parts) < 2 and "=" not in command_line:
-                return False
+                # Obsługa przypisań bez spacji, np. A=5 gdy target to "A"
+                if "=" in parts[0] and not parts[0].upper().startswith("LET"):
+                    cmd = parts[0].split("=")[0].strip().upper()
+
+                if cmd != target:
+                    return False
+                    
+                # Komendy oczekujące argumentów (np. PRINT, HELP) nie mogą być puste
+                no_arg_cmds = [
+                    "CLS", "EXIT", "HISTORY", "TAB", "DATE", "TIME",
+                    "VARS", "CLEAR", "IN", "BEEP", "RANDOMIZE", "END", "WEND",
+                    "NEW", "EDIT", "LIST", "SAVE", "FILES", "RUN", "CHECK", "HINT",
+                    "MODE", "SCREEN", "ADMIN", "CLASS"
+                ]
+                if target not in no_arg_cmds and len(parts) < 2 and "=" not in command_line:
+                    return False
                 
             if require_quotes:
                 rest = parts[1] if len(parts) > 1 else ""
                 if "=" in command_line:
                     rest = command_line.partition("=")[2]
-                if not ('"' in rest or "'" in rest):
+                if not re.search(r'"[^"]*"|\'[^\']*\'', rest):
                     return False
 
             # Sprawdzamy czy zadanie wymaga dokładnego wpisania określonej komendy
-            # Wyjątek: zadania personalne z print_1 (imię, wiek, kolor) pozwalają na wpisanie własnych danych
+            # Wyjątek: zadania personalne oraz zadania panelu nauczyciela
             task_id = task.get("id", "")
-            if task_id not in ["print_name", "print_age", "print_color"]:
+            if task_id not in ["print_name", "print_age", "print_color"] and not task_id.startswith("teacher_"):
                 test_input = task.get("test_input")
                 if test_input:
                     norm_user = normalize_code(command_line)
