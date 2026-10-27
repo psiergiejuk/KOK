@@ -259,8 +259,18 @@ class UserManager:
             if not row:
                 return None
             user_data = self._row_to_user_data(row)
-            if user_data.get("password_hash") == self._hash_password(password):
+            expected_hash = user_data.get("password_hash")
+
+            # 1. Dokładne dopasowanie hasła
+            if expected_hash == self._hash_password(password):
                 return user_data
+
+            # 2. Tolerancja na wielkość liter (np. CapsLock lub urządzenia mobilne)
+            if expected_hash == self._hash_password(password.lower()):
+                return user_data
+            if expected_hash == self._hash_password(password.upper()):
+                return user_data
+
             return None
 
     def save_user_state(self, user_data: dict):

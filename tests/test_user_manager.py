@@ -25,13 +25,19 @@ def test_user_registration_and_exists(temp_user_manager):
     assert "HELP_1" in user_data["unlocked_techs"]
 
 def test_successful_authentication(temp_user_manager):
-    """Testuje poprawne logowanie przy dobrym haśle."""
+    """Testuje poprawne logowanie przy dobrym haśle oraz tolerancję wielkości liter."""
     username = "ola"
-    temp_user_manager.register_user(username, "Ola", "Nowak", 10, "1234")
-    
-    logged_user = temp_user_manager.authenticate_user(username, "1234")
+    temp_user_manager.register_user(username, "Ola", "Nowak", 10, "tajne123")
+
+    # 1. Dokładne hasło
+    logged_user = temp_user_manager.authenticate_user(username, "tajne123")
     assert logged_user is not None
     assert logged_user["first_name"] == "Ola"
+
+    # 2. Tolerancja CapsLock / Mobile (wielkie litery)
+    logged_caps = temp_user_manager.authenticate_user(username, "TAJNE123")
+    assert logged_caps is not None
+    assert logged_caps["username"] == "ola"
 
 def test_failed_authentication_wrong_password(temp_user_manager):
     """Testuje odrzucenie logowania przy błędnym haśle."""
