@@ -1,0 +1,149 @@
+{
+  "id": "PRINT_1",
+  "name": "PRINT - Pisanie na ekranie (w konsoli)",
+  "cost": 5,
+  "requires": ["HELP_1"],
+  "unlocks_commands": ["print"],
+  "tasks": [
+    {
+      "id": "help_print",
+      "title": "Co to jest PRINT i co to jest KONSOLA?",
+      "instruction": "Zielony ekran, na którym teraz piszesz, programiści nazywają KONSOLĄ. Wpisz HELP PRINT i wciśnij ENTER, aby sprawdzić jak wypisywać na nim napisy i liczby!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "HELP" },
+      "test_input": "HELP PRINT"
+    },
+    {
+      "id": "print_start",
+      "title": "Pierwsze słowo na ekranie",
+      "instruction": "Słowo PRINT znaczy po angielsku 'wypisz na ekranie'. Wpisz PRINT \"START\" (razem z cudzysłowem) i wciśnij ENTER!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \"START\""
+    },
+    {
+      "id": "print_console_word",
+      "title": "Zagadka: Jak nazywa się ten zielony ekran?",
+      "instruction": "Sprawdźmy czy pamiętasz! Zielony ekran to KONSOLA. Wypisz to słowo na ekranie wpisując: PRINT \"KONSOLA\" i wciśnij ENTER.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \"KONSOLA\""
+    },
+    {
+      "id": "print_name",
+      "title": "Jak masz na imię?",
+      "instruction": "Teraz przedstaw się komputerowi! Wpisz PRINT i swoje imię w cudzysłowie (np. PRINT \"Zosia\") i wciśnij ENTER.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \"KUBA\""
+    },
+    {
+      "id": "print_age",
+      "title": "Ile masz lat? (Liczby bez cudzysłowu!)",
+      "instruction": "Ważna zasada: liczb NIE zamykamy w cudzysłowie! Wpisz PRINT i swój wiek jako liczbę (np. PRINT 10) i wciśnij ENTER.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 9"
+    },
+    {
+      "id": "print_color",
+      "title": "Jaki jest Twój ulubiony kolor?",
+      "instruction": "Kolor to słowo, więc znów potrzebujemy cudzysłowu! Wpisz PRINT i swój ulubiony kolor (np. PRINT \"Zielony\").",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \"ZIELONY\""
+    },
+    {
+      "id": "print_animal",
+      "title": "Wypisz w konsoli słowo KOTEK",
+      "instruction": "Uwaga, zagadka! Gdy mówimy 'wypisz w konsoli', jakiej komendy musisz użyć? Użyj komendy PRINT, aby wypisać słowo \"KOTEK\"!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": true },
+      "test_input": "PRINT \"KOTEK\""
+    },
+    {
+      "id": "print_number_100",
+      "title": "Wypisz w konsoli liczbę 100",
+      "instruction": "A jak wypisać w konsoli liczbę 100? Użyj komendy PRINT i wpisz liczbę 100 (bez cudzysłowu!).",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 100"
+    },
+    {
+      "id": "print_repeat_5",
+      "title": "Trening Mistrza PRINT (5 razy)",
+      "instruction": "Aby komenda PRINT dobrze utrwaliła się w pamięci, użyj polecenia PRINT pięć razy z rzędu (wypisz dowolne słowa lub liczby!).",
+      "reward_sp": 1,
+      "validation": { "type": "counter", "target_command": "PRINT", "required_count": 5 },
+      "test_input": ["PRINT \"a\"", "PRINT \"a\"", "PRINT \"a\"", "PRINT \"a\"", "PRINT \"a\""]
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "q_print_1",
+      "question": "Jak nazywa się zielone pole na ekranie, na którym piszemy komendy i wyświetlają się wiadomości z PRINT?",
+      "options": [
+        "Konsola",
+        "Lodówka",
+        "Klawiatura",
+        "Pralka"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q_print_2",
+      "question": "Jakiej komendy używamy, gdy zadanie prosi: 'wypisz coś w konsoli' (na ekranie)?",
+      "options": [
+        "HELP",
+        "PRINT",
+        "START",
+        "EKRAN"
+      ],
+      "correct": 2
+    },
+    {
+      "id": "q_print_3",
+      "question": "W jakich znakach musimy zamknąć słowo lub tekst po komendzie PRINT (np. PRINT \"KOT\")?",
+      "options": [
+        "W nawiasach ( )",
+        "W cudzysłowie \" \"",
+        "W gwiazdkach * *",
+        "Nie trzeba żadnych znaków"
+      ],
+      "correct": 2
+    },
+    {
+      "id": "q_print_4",
+      "question": "Jak poprawnie wypisać w konsoli liczbę 10?",
+      "options": [
+        "PRINT 10",
+        "KONSOLA 10",
+        "HELP 10",
+        "10 PRINT"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q_print_err_1",
+      "question": "Widzisz w konsoli komunikat: \"SYNTAX ERROR: Niezdefiniowana zmienna lub brak cudzysłowu dla tekstu ('KOT')\". Jak naprawić ten błąd?",
+      "options": [
+        "Zamknąć słowo w cudzysłowie, czyli napisać: PRINT \"KOT\"",
+        "Wyłączyć i włączyć komputer",
+        "Napisać słowo KOT od tyłu",
+        "Wciskać klawisz F1 dziesięć razy"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q_print_err_2",
+      "question": "Widzisz w konsoli komunikat: \"SYNTAX ERROR: Brak argumentu po PRINT.\". Co poszło nie tak?",
+      "options": [
+        "Wpisałeś samo słowo PRINT i nie podałeś po spacji, co komputer ma wypisać",
+        "Napis był za długi",
+        "Komputer zapomniał jak się pisze",
+        "Użyłeś za dużych liter"
+      ],
+      "correct": 1
+    }
+  ]
+}

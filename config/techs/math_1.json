@@ -1,0 +1,130 @@
+{
+  "id": "MATH_1",
+  "name": "MATH - Kalkulator BASIC (+ - * /)",
+  "cost": 10,
+  "requires": ["TAB_1", "CLS_1", "HISTORY_1"],
+  "unlocks_commands": ["math"],
+  "tasks": [
+    {
+      "id": "help_math",
+      "title": "Sprawdź jak liczy komputer",
+      "instruction": "Czas zamienić komputer w super-kalkulator! Sprawdź w pomocy jakich znaków używamy do liczenia: wpisz HELP MATH (możesz użyć H + TAB!) i wciśnij ENTER.",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "HELP" },
+      "test_input": "HELP MATH"
+    },
+    {
+      "id": "math_add_1",
+      "title": "1. Pierwsze dodawanie",
+      "instruction": "Aby komputer coś policzył i pokazał wynik na ekranie (w konsoli), używamy komendy PRINT. Dodaj 2 + 2 wpisując: PRINT 2 + 2 (lub P + TAB i 2 + 2)!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 2 + 2"
+    },
+    {
+      "id": "math_add_2",
+      "title": "2. Klocki w pudełku",
+      "instruction": "Masz 15 klocków i dokładasz jeszcze 10. Dodaj 15 + 10 i wypisz wynik na ekranie (pamiętaj o komendzie PRINT)!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 15 + 10"
+    },
+    {
+      "id": "math_sub_1",
+      "title": "3. Odejmowanie",
+      "instruction": "Odejmij 10 - 3 i wypisz wynik na ekranie (w konsoli)!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 10 - 3"
+    },
+    {
+      "id": "math_sub_2",
+      "title": "4. Kieszonkowe",
+      "instruction": "Miałeś 50 złotych kieszonkowego i wydałeś 20 złotych. Oblicz 50 - 20 i wypisz wynik w konsoli!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 50 - 20"
+    },
+    {
+      "id": "math_mul_1",
+      "title": "5. Mnożenie z gwiazdką (*)",
+      "instruction": "W komputerze znak mnożenia to GWIAZDKA (*). Pomnóż 3 * 4 i wypisz wynik w konsoli!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 3 * 4"
+    },
+    {
+      "id": "math_div_1",
+      "title": "6. Dzielenie z ukośnikiem (/)",
+      "instruction": "Znak dzielenia na klawiaturze to UKOŚNIK (/). Podziel 8 / 2 i wypisz wynik w konsoli!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT 8 / 2"
+    },
+    {
+      "id": "math_brackets",
+      "title": "7. Zagadka z nawiasami",
+      "instruction": "Tak jak w szkole, nawiasy liczą się pierwsze! Oblicz (2 + 3) * 2 i wypisz wynik w konsoli!",
+      "reward_sp": 1,
+      "validation": { "type": "command_prefix", "target": "PRINT", "require_quotes": false },
+      "test_input": "PRINT (2 + 3) * 2"
+    }
+  ],
+  "quizzes": [
+    {
+      "id": "q_math_1",
+      "question": "Jakiego znaku używamy w programowaniu do MNOŻENIA dwóch liczb?",
+      "options": [
+        "Gwiazdki ( * )",
+        "Kropki ( . )",
+        "Krzyżyka ( # )",
+        "Dolara ( $ )"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q_math_2",
+      "question": "Jakiego znaku używamy w programowaniu do DZIELENIA liczb?",
+      "options": [
+        "Dwukropka ( : )",
+        "Ukośnika ( / )",
+        "Minusa ( - )",
+        "Przecinka ( , )"
+      ],
+      "correct": 2
+    },
+    {
+      "id": "q_math_3",
+      "question": "Co trzeba napisać przed działaniem 5 + 5, aby komputer wyświetlił wynik w konsoli?",
+      "options": [
+        "CLS 5 + 5",
+        "PRINT 5 + 5",
+        "HELP 5 + 5",
+        "HISTORY 5 + 5"
+      ],
+      "correct": 2
+    },
+    {
+      "id": "q_math_err_1",
+      "question": "Widzisz w konsoli komunikat: \"SYNTAX ERROR: Dzielenie przez zero nie jest dozwolone!\". Co oznacza ten błąd?",
+      "options": [
+        "Próbowałeś podzielić liczbę przez 0 (np. PRINT 10 / 0), a w matematyce przez zero dzielić nie wolno",
+        "Zero jest za małą cyfrą na ekranie",
+        "Zepsuł się klawisz z zerem",
+        "Trzeba wpisać dwa zera zamiast jednego"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "q_math_err_2",
+      "question": "Widzisz komunikat: \"SYNTAX ERROR: Nieznana komenda '2'\". Dlaczego komputer nie policzył wpisanych samych cyfr '2 + 2'?",
+      "options": [
+        "Bo na początku zabrakło komendy PRINT (powinno być: PRINT 2 + 2)",
+        "Bo komputer nie zna cyfry 2",
+        "Bo dodawanie jest zablokowane",
+        "Bo trzeba pisać słownie DWA PLUS DWA"
+      ],
+      "correct": 1
+    }
+  ]
+}
