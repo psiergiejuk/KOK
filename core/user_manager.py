@@ -1,7 +1,66 @@
+import datetime
 import hashlib
 import json
 import os
+import secrets
 import sqlite3
+import time
+
+
+class LoginRateLimiter:
+    """Zarządza limitami nieudanych prób logowania (ochrona przed Brute-Force / DDoS)."""
+
+    def __init__(self, max_attempts: int = 5, window_seconds: int = 300, lockout_seconds: int = 900):
+        self.max_attempts = max_attempts
+        self.window_seconds = window_seconds
+        self.lockout_seconds = lockout_seconds
+        self.attempts = {}  # key -> list of float timestamps
+        self.lockouts = {}  # key -> lockout expiration float timestamp
+
+    def is_blocked(self, ip: str = None, username: str = None, now: float = None) -> tuple[bool, int]:
+        if now is None:
+            now = time.time()
+        keys = []
+        if ip:
+            keys.append(f"ip:{ip.strip()}")
+        if username:
+            keys.append(f"user:{username.strip().lower()}")
+
+        for k in keys:
+            locked_until = self.lockouts.get(k, 0)
+            if now < locked_until:
+                return True, int(locked_until - now)
+        return False, 0
+
+    def record_failure(self, ip: str = None, username: str = None, now: float = None):
+        if now is None:
+            now = time.time()
+        keys = []
+        if ip:
+            keys.append(f"ip:{ip.strip()}")
+        if username:
+            keys.append(f"user:{username.strip().lower()}")
+
+        for k in keys:
+            history = [t for t in self.attempts.get(k, []) if now - t < self.window_seconds]
+            history.append(now)
+            self.attempts[k] = history
+            if len(history) >= self.max_attempts:
+                self.lockouts[k] = now + self.lockout_seconds
+
+    def record_success(self, ip: str = None, username: str = None):
+        keys = []
+        if ip:
+            keys.append(f"ip:{ip.strip()}")
+        if username:
+            keys.append(f"user:{username.strip().lower()}")
+        for k in keys:
+            self.attempts.pop(k, None)
+            self.lockouts.pop(k, None)
+
+    def reset(self):
+        self.attempts.clear()
+        self.lockouts.clear()
 
 
 class UserManager:
@@ -19,6 +78,8 @@ class UserManager:
 
         os.makedirs(os.path.dirname(os.path.abspath(self.db_path)), exist_ok=True)
         os.makedirs(self._data_dir, exist_ok=True)
+
+        self.login_limiter = LoginRateLimiter(max_attempts=5, window_seconds=300, lockout_seconds=900)
 
         self._init_db()
         self._auto_migrate_json_files()
@@ -107,6 +168,16 @@ class UserManager:
                 );
             """)
 
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS sessions (
+                    token TEXT PRIMARY KEY,
+                    username TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMP NOT NULL,
+                    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+                );
+            """)
+
             # Migracje kolumn dla istniejących baz
             cols = [r["name"] for r in conn.execute("PRAGMA table_info(users);").fetchall()]
             new_cols = {
@@ -130,7 +201,8 @@ class UserManager:
             if admin_row:
                 conn.execute("UPDATE users SET role = 'admin' WHERE LOWER(username) = 'admin';")
             else:
-                admin_pass_hash = self._hash_password("admin")
+                admin_initial_pass = os.environ.get("ADMIN_INITIAL_PASSWORD") or "admin"
+                admin_pass_hash = self._hash_password(admin_initial_pass)
                 conn.execute("""
                     INSERT INTO users (username, first_name, last_name, age, password_hash, role)
                     VALUES ('admin', 'Administrator', 'Systemu', 40, ?, 'admin');
@@ -272,6 +344,73 @@ class UserManager:
                 return user_data
 
             return None
+
+    def is_login_blocked(self, ip: str = None, username: str = None, now: float = None) -> tuple[bool, int]:
+        """Sprawdza, czy IP lub konto użytkownika ma aktywną blokadę brute-force (zwraca: (is_blocked, remaining_seconds))."""
+        return self.login_limiter.is_blocked(ip=ip, username=username, now=now)
+
+    def record_failed_login(self, ip: str = None, username: str = None, now: float = None):
+        """Rejestruje nieudaną próbę logowania dla IP i/lub nazwy użytkownika."""
+        self.login_limiter.record_failure(ip=ip, username=username, now=now)
+
+    def record_successful_login(self, ip: str = None, username: str = None):
+        """Czyści licznik nieudanych prób logowania po poprawnym uwierzytelnieniu."""
+        self.login_limiter.record_success(ip=ip, username=username)
+
+    def reset_login_rate_limits(self):
+        """Resetuje wszystkie limity i blokady logowania (np. dla testów)."""
+        self.login_limiter.reset()
+
+    def create_session(self, username: str, duration_hours: int = 24) -> str:
+        """Tworzy bezpieczny kryptograficzny token sesyjny i zapisuje go w bazie SQLite."""
+        token = secrets.token_hex(32)
+        now = datetime.datetime.now(datetime.timezone.utc)
+        expires_at = now + datetime.timedelta(hours=duration_hours)
+        with self._get_connection() as conn:
+            conn.execute("""
+                INSERT OR REPLACE INTO sessions (token, username, expires_at)
+                VALUES (?, ?, ?)
+            """, (token, username.strip().lower(), expires_at.isoformat()))
+            conn.commit()
+        return token
+
+    def get_session_user(self, token: str) -> dict | None:
+        """Zwraca profil użytkownika powiązany z ważnym tokenem sesyjnym."""
+        if not token or not isinstance(token, str):
+            return None
+        token = token.strip()
+        with self._get_connection() as conn:
+            row = conn.execute("""
+                SELECT s.expires_at, u.*
+                FROM sessions s
+                JOIN users u ON LOWER(s.username) = LOWER(u.username)
+                WHERE s.token = ?
+            """, (token,)).fetchone()
+            if not row:
+                return None
+
+            expires_at_str = row["expires_at"]
+            try:
+                exp_dt = datetime.datetime.fromisoformat(expires_at_str)
+                if exp_dt.tzinfo is None:
+                    exp_dt = exp_dt.replace(tzinfo=datetime.timezone.utc)
+                now = datetime.datetime.now(datetime.timezone.utc)
+                if now > exp_dt:
+                    conn.execute("DELETE FROM sessions WHERE token = ?", (token,))
+                    conn.commit()
+                    return None
+            except Exception:
+                pass
+
+            return self._row_to_user_data(row)
+
+    def delete_session(self, token: str):
+        """Usuwa token sesyjny (wylogowanie)."""
+        if not token:
+            return
+        with self._get_connection() as conn:
+            conn.execute("DELETE FROM sessions WHERE token = ?", (token.strip(),))
+            conn.commit()
 
     def save_user_state(self, user_data: dict):
         """Zapisuje aktualny stan profilu gracza w bazie SQLite."""

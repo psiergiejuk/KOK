@@ -15,7 +15,7 @@
 
 Projekt działa w architekturze **Client-Heavy (Offline-First)**:
 * Cały emulator retro (kineskop CRT, interpreter BASIC, edytor programów, wirtualna klawiatura dotykowa i ewaluator zadań) działa w 100% w przeglądarce w JavaScript – bez opóźnień, na komputerach, tabletach i smartfonach.
-* Backend w Pythonie (Flask) odpowiada za autoryzację, bezpieczną bazę danych uczniów i nauczycieli (SQLite + JSON), synchronizację postępów w chmurze, system klas szkolnych oraz sztuczną inteligencję **Profesora KOK-88**.
+* Backend w Pythonie (wbudowany standard WSGI `wsgiref` bez zewnętrznych zależności) odpowiada za autoryzację, tokeny sesyjne, ochronę przed atakami brute-force/DDoS, bezpieczną bazę danych uczniów i nauczycieli (SQLite + JSON), synchronizację postępów w chmurze, system klas szkolnych oraz sztuczną inteligencję **Profesora KOK-88**.
 
 ---
 
@@ -40,10 +40,10 @@ Projekt działa w architekturze **Client-Heavy (Offline-First)**:
 * **Historia poleceń**:
   * Strzałki w górę/dół (`↑`/`↓`) po odblokowaniu technologii `HISTORY_1`.
 
-### 🧠 3. Gamifikacja i Drzewo Technologii (216 Zadań)
+### 🧠 3. Gamifikacja i Drzewo Technologii (221 Zadań)
 * **Drzewo wiedzy**: 30+ technologii podzielonych na poziomy (Tier 1–6): od prostego `PRINT`, przez zmienne (`LET`), operacje arytmetyczne, pętle `FOR...NEXT`, warunki `IF...THEN`, po grafikę `GFX`, dźwięki `SOUND`, obsługę pinów `GPIO` i system plików `FILES`.
-* **216 interaktywnych zadań**: natychmiastowa weryfikacja kodu z nagrodami w postaci Punktów Nauki (SP).
-* **70+ quizów teoretycznych**: utrwalanie wiedzy poprzez pytania wielokrotnego wyboru.
+* **221 interaktywnych zadań**: natychmiastowa weryfikacja kodu z nagrodami w postaci Punktów Nauki (SP).
+* **70+ quizów teoretycznych**: utrwalanie wiedzy poprzez pytania z losową kolejnością odpowiedzi.
 * **Profesor KOK-88 (AI)**:
   * `HINT` – pomocne podpowiedzi w trudnych momentach dostosowane do wieku ucznia.
   * `CHECK` – profesorska analiza poprawności programu napisanego w edytorze.
@@ -70,13 +70,13 @@ KOK/
 │   ├── tech_tree.json       # Główny indeks technologii
 │   └── techs/               # 30+ plików definicji modułów (zadania, quizy, odblokowania)
 ├── core/                    # Backend Python (lekki, bez zewnętrznych bibliotek okienkowych)
-│   ├── user_manager.py      # Zarządzanie użytkownikami, SQLite/JSON, haszowanie, role
+│   ├── user_manager.py      # Zarządzanie użytkownikami, SQLite/JSON, haszowanie, role, sesje, rate-limiter
 │   ├── quest_validator.py   # Silnik walidacji zadań i wymagań
 │   ├── tech_tree.py         # Loader struktury drzewa technologii
 │   ├── player_state.py      # Logika punktów SP i odblokowywania gałęzi
 │   └── professor_ai.py      # Integracja z modelem AI Profesora KOK-88
 ├── www/                     # Aplikacja Webowa
-│   ├── app.py               # REST API Flask & serwowanie aplikacji
+│   ├── app.py               # REST API WSGI (wsgiref) & serwowanie aplikacji
 │   ├── wsgi.py              # Punkt wejścia WSGI dla serwerów produkcyjnych
 │   └── static/              # Klient Retro (Frontend)
 │       ├── js/
@@ -84,19 +84,19 @@ KOK/
 │       │   ├── basic_engine.js     # Interpreter BASIC w JavaScript
 │       │   ├── quest_runner.js     # Obsługa zadań, quizów i drzewa technologii
 │       │   └── virtual_keyboard.js # Dotykowa klawiatura wirtualna
-│       ├── css/style.css           # Retro stylistyka i responsywność
+│       ├── css/retro.css           # Retro stylistyka kineskopu i responsywność
 │       └── index.html              # Główny szablon aplikacji
 ├── tests/                   # Zestawy testów automatycznych
-│   ├── test_user_manager.py        # Testy bazy danych i ról użytkowników
-│   ├── test_quest_validator.py     # Testy walidatora + auto-test 216 zadań
+│   ├── test_user_manager.py        # Testy bazy danych, ról, sesji i limitów logowania
+│   ├── test_quest_validator.py     # Testy walidatora + auto-test 221 zadań
 │   ├── test_tech_tree.py           # Testy integralności drzewa
-│   ├── test_web_app.py             # Testy endpointów REST API
+│   ├── test_web_app.py             # Testy endpointów REST API, sesji, brute-force i DDoS
 │   └── js/                         # Testy frontendu (Node.js test runner)
 │       ├── basic_engine.test.js    # Testy interpretera BASIC
 │       ├── crt_display.test.js     # Testy wyświetlacza i skrótów TAB / Ctrl+C
-│       ├── quest_runner.test.js    # Testy walidatora zadań przeglądarki
+│       ├── quest_runner.test.js    # Testy walidatora zadań, quizów i tasowania opcji
 │       ├── virtual_keyboard.test.js# Testy klawiatury wirtualnej
-│       └── tech_tree_automation.test.js # Test 216 zadań w silniku JS
+│       └── tech_tree_automation.test.js # Test 221 zadań w silniku JS
 └── archive/                 # Archiwum historycznych wersji
     └── first_version_with_pc_app_2026_10_28/ # Pierwsza wersja desktopowa Pygame
 ```
@@ -106,24 +106,19 @@ KOK/
 ## 🚀 Jak Uruchomić Projekt?
 
 ### Wymagania:
-* **Python 3.10+**
-* Opcjonalnie: **Node.js 18+** (do uruchamiania testów jednostkowych JavaScript)
+* **Python 3.10+** (brak konieczności instalowania zewnętrznych bibliotek frameworkowych – backend bazuje na standardowym `wsgiref`)
+* Opcjonalnie: **Node.js 18+** (do uruchamiania zestawu testów jednostkowych JavaScript)
 
-### 1. Instalacja zależności Pythona:
-```bash
-pip install flask
-```
-
-### 2. Uruchomienie serwera deweloperskiego:
+### 1. Uruchomienie serwera deweloperskiego:
 ```bash
 python www/app.py
 ```
 Aplikacja będzie dostępna w przeglądarce pod adresem:
-👉 **`http://localhost:5000`**
+👉 **`http://localhost:8080`**
 
 Dla środowiska produkcyjnego (Gunicorn / uWSGI):
 ```bash
-gunicorn wsgi:app --bind 0.0.0.0:8000
+gunicorn wsgi:app --bind 0.0.0.0:8080
 ```
 
 ---
@@ -136,16 +131,16 @@ Projekt kładzie bardzo duży nacisk na stabilność i pokrycie testami zarówno
 ```bash
 pytest
 ```
-* Wszystkie 29 testów wykonuje się w ~1.4 sekundy.
-* Pełna automatyczna weryfikacja 216 zadań drzewa technologii.
-* Czyste wykonanie bez ostrzeżeń środowiskowych.
+* Wszystkie 34 testy wykonują się w ~4 sekundy.
+* Pełna automatyczna weryfikacja 221 zadań drzewa technologii.
+* Testy sesji, ról administracyjnych, rate limitera brute-force i ochrony anty-DDoS.
 
 ### Uruchomienie testów JavaScript (Frontend):
 ```bash
 npm test
 ```
 * Wykorzystuje natywny silnik `node --test`.
-* Sprawdza interpreter BASIC, kineskop CRT, autouzupełnianie TAB, obsługę `Ctrl+C` oraz przechodzi wszystkie 216 zadań w silniku JS.
+* 42 testy sprawdzają interpreter BASIC, kineskop CRT, autouzupełnianie TAB, tasowanie quizów, obsługę `Ctrl+C` oraz przechodzą wszystkie 221 zadań w silniku JS.
 
 ### Pokrycie testami (Coverage):
 ```bash

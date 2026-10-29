@@ -177,3 +177,52 @@ def test_remote_tech_manipulation_and_command_log(temp_user_manager):
     recent = temp_user_manager.get_user_recent_commands("zdalny_gracz", limit=20)
     assert len(recent) == 20
     assert "PRINT 24" in recent[-1]
+
+
+def test_session_management(temp_user_manager):
+    temp_user_manager.register_user("sess_user", "Sesja", "T", 12, "pass")
+
+    # Tworzenie sesji
+    token = temp_user_manager.create_session("sess_user", duration_hours=1)
+    assert token is not None
+    assert len(token) == 64  # secrets.token_hex(32) daje 64 znaki hex
+
+    # Weryfikacja sesji
+    user = temp_user_manager.get_session_user(token)
+    assert user is not None
+    assert user["username"] == "sess_user"
+
+    # Nieprawidłowy token
+    assert temp_user_manager.get_session_user("invalid_token") is None
+
+    # Usunięcie sesji
+    temp_user_manager.delete_session(token)
+    assert temp_user_manager.get_session_user(token) is None
+
+
+def test_login_rate_limiter(temp_user_manager):
+    ip = "10.0.0.99"
+    user = "locked_user"
+
+    temp_user_manager.reset_login_rate_limits()
+
+    # Początkowo nie ma blokady
+    blocked, _ = temp_user_manager.is_login_blocked(ip, user)
+    assert blocked is False
+
+    # 4 nieudane próby
+    for _ in range(4):
+        temp_user_manager.record_failed_login(ip, user)
+        blocked, _ = temp_user_manager.is_login_blocked(ip, user)
+        assert blocked is False
+
+    # 5. nieudana próba - włącza się blokada
+    temp_user_manager.record_failed_login(ip, user)
+    blocked, rem = temp_user_manager.is_login_blocked(ip, user)
+    assert blocked is True
+    assert rem > 0
+
+    # Sukces resetuje limit dla użytkownika i IP
+    temp_user_manager.record_successful_login(ip, user)
+    blocked, _ = temp_user_manager.is_login_blocked(ip, user)
+    assert blocked is False
