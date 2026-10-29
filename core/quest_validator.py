@@ -19,10 +19,11 @@ class QuestValidator:
         else:
             raw_lines = task.get("sample_program") or []
 
+        requires_rem = any(kw.upper() in ("REM", "'") for kw in val_cfg.get("required_keywords", []))
         clean_lines = [
             re.sub(r'^\d+\s+', '', l).strip()
             for l in raw_lines
-            if l and l.strip() and not l.strip().upper().startswith("REM")
+            if l and l.strip() and (requires_rem or not l.strip().upper().startswith("REM"))
         ]
 
         if not clean_lines:
@@ -31,7 +32,7 @@ class QuestValidator:
                 "Wpisz EDIT, napisz program, wyjdź klawiszem ESC i wpisz RUN."
             )
 
-        min_lines = val_cfg.get("min_lines", 2)
+        min_lines = val_cfg.get("min_lines", 1)
         if len(clean_lines) < min_lines:
             return False, (
                 f"🤖 PROFESOR KOK-88: Twój program ma dopiero {len(clean_lines)} linijkę, "
@@ -39,6 +40,12 @@ class QuestValidator:
             )
 
         upper_code = "\n".join(clean_lines).upper()
+
+        expected_output = val_cfg.get("expected_output")
+        if expected_output:
+            expected_upper = expected_output.upper()
+            if expected_upper not in upper_code and not any("PRINT" in l.upper() for l in raw_lines):
+                return False, f"🤖 WSKAZÓWKA PROFESORA: Program powinien wyświetlić: {expected_output}!"
 
         for kw in val_cfg.get("required_keywords", []):
             if kw.upper() not in upper_code:
@@ -106,7 +113,7 @@ class QuestValidator:
                     "CLS", "EXIT", "HISTORY", "TAB", "DATE", "TIME",
                     "VARS", "CLEAR", "IN", "BEEP", "RANDOMIZE", "END", "WEND",
                     "NEW", "EDIT", "LIST", "SAVE", "FILES", "RUN", "CHECK", "HINT",
-                    "MODE", "SCREEN", "ADMIN", "CLASS"
+                    "MODE", "SCREEN", "ADMIN", "CLASS", "BREAK", "REM", "'"
                 ]
                 if target not in no_arg_cmds and len(parts) < 2 and "=" not in command_line:
                     return False

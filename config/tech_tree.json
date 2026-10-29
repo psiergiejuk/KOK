@@ -2,6 +2,7 @@
   "technologies_files": [
     "config/techs/help_1.json",
     "config/techs/print_1.json",
+    "config/techs/rem_1.json",
     "config/techs/tab_1.json",
     "config/techs/cls_1.json",
     "config/techs/history_1.json",
@@ -27,6 +28,7 @@
     "config/techs/gpio_1.json",
     "config/techs/sound_1.json",
     "config/techs/edit_1.json",
+    "config/techs/edit_ide.json",
     "config/techs/prog_1.json",
     "config/techs/exit_1.json",
     "config/techs/teacher_1.json"
